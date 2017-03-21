@@ -31,13 +31,21 @@ Rain = Datos
 datosprecip=as.data.frame(matrix(NA,nrow(fechas),length(Rain)))
 
 
+
 for(j in 1:length(Rain)) {  
   
-  
-  final=merge(fechas,Rain[[j]],by="Date",all.x=T)
-  if(nrow(final)==nrow(datosprecip)){
-    datosprecip[,j]=final[,3]
+  old=na.omit(Rain[[j]])
+  if(nrow(old)!=0){
+    combnew=old[!duplicated(old[,1]),]
+  }else{
+    combnew = old
   }
+  
+  
+  final=merge(fechas,combnew,by="Date",all.x=T)
+  #if(nrow(final)==nrow(datosprecip)){
+    datosprecip[,j]=final[,3]
+  #}
   
 }
 
