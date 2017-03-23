@@ -2,6 +2,8 @@
 ###Script para organizar inputs para RClimTool
 ####Lizeth Llanos
 #######################################################
+
+
 # rutOrigen="S:/observed/weather_station/col-ideam/daily-raw/tmax-per-station" #Ruta donde se encuentran los archivos .txt
 # rutOrigen="S:/observed/weather_station/col-ideam/daily-raw/tmin-per-station" #Ruta donde se encuentran los archivos .txt
 rutOrigen="X:/Water_Planning_System/01_weather_stations/hnd_dgrh/monthly_raw/prec-per-station" #Ruta donde se encuentran los archivos .txt
