@@ -6,6 +6,7 @@
 
 #Monthly data
 rutOrigen="X:/Water_Planning_System/01_weather_stations/hnd_dgrh/monthly_raw/prec-per-station" #Ruta donde se encuentran los archivos .txt
+dir.create(paste0(outDir,"monthly_processed"),showWarnings = F)
 
 
 files <-list.files(rutOrigen,pattern="\\.txt$")
@@ -64,6 +65,7 @@ write.csv(precipfin,paste("hnd_precip_all.csv",sep=""),row.names=F)
 #Daily data
 
 rutOrigen="X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_raw/prec-per-station/" #Ruta donde se encuentran los archivos .txt
+dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
 
 
 files <-list.files(rutOrigen,pattern="\\.txt$")
@@ -115,4 +117,4 @@ names(precipfin)=c("day","month","year",as.character(station_find_n1))
 
 
 #Se guardan los archivos en formato .csv con la info organizada
-write.csv(precipfin,paste("X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_raw/precip_daily_all.csv",sep=""),row.names=F)
+write.csv(precipfin,paste("X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/precip_daily_all.csv",sep=""),row.names=F)
