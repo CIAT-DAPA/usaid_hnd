@@ -4,7 +4,7 @@
 
 ##############################################################################
 #function to read in and input data for GHCN stuff
-getRawGHCN <- function(ghcnDir,yr,rg,stations) {
+getRawGHCN <- function(ghcnDir,yr,rg,stations,var) {
   #list stations in folder
   reDir <- paste(hdir,"/ghcnd_",rg,sep="")
   stList <- list.files(reDir)
@@ -23,7 +23,14 @@ getRawGHCN <- function(ghcnDir,yr,rg,stations) {
     dayMx$LON[i] <- stations$LON[which(stations$ID==dayMx$ID[i])]
     dayMx$LAT[i] <- stations$LAT[which(stations$ID==dayMx$ID[i])]
     dayMx$ALT[i] <- stations$ALT[which(stations$ID==dayMx$ID[i])]
-    dd <- stData$PRCP; if (length(dd) == 365) {dd <- c(dd,NA)}
+    if (var == "prec") {
+      dd <- stData$PRCP; if (length(dd) == 365) {dd <- c(dd,NA)}  
+    } else if (var == "tmax"){
+      dd <- stData$TMAX; if (length(dd) == 365) {dd <- c(dd,NA)}
+    } else if (var == "tmin"){
+      dd <- stData$TMIN; if (length(dd) == 365) {dd <- c(dd,NA)}
+    }
+    
     dayMx[which(dayMx$ID==id),5:370] <- dd
   }
   return(dayMx)
@@ -93,16 +100,27 @@ countNADays <- function(dayData) {
 ####################################################################################
 #Function to read in and convert GHCND data to a readable nice matrix with all dates
 ####################################################################################
-convertGHCND <- function(id,yr,ddir,odir) {
+convertGHCND <- function(id,yr,var,ddir,odir) {
   osdir <- paste(odir,"/",id,sep=""); if (!file.exists(osdir)) {dir.create(osdir)}
   oFile <- paste(osdir,"/",yr,".csv",sep="")
   if (!file.exists(oFile)) {
     nday <- leap(yr)
     bmat <- createBaseMat(nday)
     wData <- getDataGHCN(id,yr,ddir,bmat)
-    wData$PRCP[which(wData$M=="P")] <- NA
-    wData$PRCP[which(wData$Q=="I" | wData$Q=="M" | wData$Q=="N" | wData$Q=="X" | wData$Q=="O")] <- NA
-    wData$PRCP <- wData$PRCP/10
+    
+    if (var == "prec") {
+      wData$PRCP[which(wData$M=="P")] <- NA
+      wData$PRCP[which(wData$Q=="I" | wData$Q=="M" | wData$Q=="N" | wData$Q=="X" | wData$Q=="O")] <- NA
+      wData$PRCP <- wData$PRCP/10
+    } else if (var == "tmax"){
+      wData$TMAX[which(wData$M=="P")] <- NA
+      wData$TMAX[which(wData$Q=="I" | wData$Q=="M" | wData$Q=="N" | wData$Q=="X" | wData$Q=="O")] <- NA
+      wData$TMAX <- wData$TMAX/10
+    } else if (var == "tmin"){
+      wData$TMIN[which(wData$M=="P")] <- NA
+      wData$TMIN[which(wData$Q=="I" | wData$Q=="M" | wData$Q=="N" | wData$Q=="X" | wData$Q=="O")] <- NA
+      wData$TMIN <- wData$TMIN/10
+    }
     write.csv(wData,paste(osdir,"/",yr,".csv",sep=""),quote=F,row.names=F)
   }
 }
@@ -223,7 +241,15 @@ getDataGHCN <- function(id,year,data.dir,base.mat) {
   if (file.exists(fName)) {
     stData <- read.fortran(fName,format=c("A11","I4","I2","A4",rep(c("F5","3A1"),times=31))) #read data
     names(stData) <- c("ID","YEAR","MONTH","VARIABLE",rep(c("D","M","Q","S"),times=31)) #set names
-    stData <- stData[which(stData$VARIABLE=="PRCP"),] #get only precip data
+    
+    if (var == "prec") {
+      stData <- stData[which(stData$VARIABLE=="PRCP"),] #get only precip data
+    } else if (var == "tmax"){
+      stData <- stData[which(stData$VARIABLE=="TMAX"),] #get only precip data
+    } else if (var == "tmin"){
+      stData <- stData[which(stData$VARIABLE=="TMIN"),] #get only precip data
+    }
+    
     stData <- stData[which(stData$YEAR == year),] #get only that year's data
     if (nrow(stData)!=0) { #do only if there is data for that year
       prcp <- apply(base.mat,1,searchData,"D",stData) #get actual data
@@ -281,7 +307,7 @@ leap <- function(year) {
 }
 
 ####################################################################################
-#Function to convert to monthly data and calculate the 30yr averages for GSOD data
+#Fucntion to convert to monthly data and calculate the 30yr averages for GSOD data
 ####################################################################################
 mergeDailyGSOD <- function(oDir, ogdir, st_ids, usaf_ids){
 
@@ -349,18 +375,13 @@ mergeDailyGSOD <- function(oDir, ogdir, st_ids, usaf_ids){
     
   }
   
-  names(dataMt_prec) <- usaf_ids
-  names(dataMt_tmax) <- usaf_ids
-  names(dataMt_tmin) <- usaf_ids
+  dataMt_prec <- cbind(dates, dataMt_prec)
+  dataMt_tmax <- cbind(dates, dataMt_tmax)
+  dataMt_tmin <- cbind(dates, dataMt_tmin)
   
-  # Add dates
-  year = as.numeric(substr(dates[,1],1,4))
-  month = as.numeric(substr(dates[,1],5,6))
-  day = as.numeric(substr(dates[,1],7,8))
-  
-  dataMt_prec <- cbind("Year"=year, "Month"=month, "Day"=day, dataMt_prec)
-  dataMt_tmax <- cbind("Year"=year, "Month"=month, "Day"=day, dataMt_tmax)
-  dataMt_tmin <- cbind("Year"=year, "Month"=month, "Day"=day, dataMt_tmin)
+  names(dataMt_prec) <- c("Date", usaf_ids) 
+  names(dataMt_tmax) <- c("Date", usaf_ids)
+  names(dataMt_tmin) <- c("Date", usaf_ids)
   
   write.csv(dataMt_prec, paste0(odir, "/prec_daily_all_qc.csv"), row.names=F)
   write.csv(dataMt_tmax, paste0(odir, "/tmax_daily_all_qc.csv"), row.names=F)
@@ -372,10 +393,11 @@ mergeDailyGSOD <- function(oDir, ogdir, st_ids, usaf_ids){
 ### Monthly aggregation QC GSOD ####
 ####################################
 
-monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/GSOD", oDir = "Z:/DATA/WP2/01_Weather_Stations/GSOD"){
+monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL", oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"){
   
   # Read daily QC data
   data_qc <- read.csv(paste0(bDir, "/", var, "_daily_all_qc.csv"), header = T)
+  
   
   # Monthly aggregation based on min percent of NA
   
@@ -395,7 +417,7 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/GSOD
     
     sum22=function(a,na.rm=T){
       na.x=mean(is.na(a))/length(a)
-      if(na.x>=0.60){
+      if(na.x>=0.20){
         x=NA
       }else{x=mean(a,na.rm=any(!is.na(a)))}
       
@@ -405,11 +427,8 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/GSOD
   }
   
   # Aggregate 
-  monthly_var = aggregate(data_qc, by=list(Month=data_qc$Month,Year=data_qc$Year),sum22)
-  monthly_var[,3] <- NULL
-  monthly_var[,3] <- NULL
-  monthly_var[,3] <- NULL
-  
+  monthly_var = aggregate(data_qc, list(Month=substr(data_qc$Date, 5, 6),Year=substr(data_qc$Date, 1, 4)),sum22)
+  monthly_var$Date <- NULL
   
   # Write monthly quality controled
   write.csv(monthly_var, paste0(oDir, "/", var, "_monthly_all.csv"), row.names=F)
@@ -461,7 +480,6 @@ clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/COL",
   ## Add station info
   stInfo <- read.csv(st_loc, header=T)
   join <- merge(stInfo, monthly_avg, by = "Station", all = FALSE)
-  join_names <- merge(stInfo, st_names, by = "Station", all = FALSE)
   
   # Combine info and data
   climData <- cbind(monthly_avg$Station, "GSOD", monthly_avg$Station, join$Name, "GSOD", join$Lon, join$Lat, join$Alt, monthly_avg[,2:ncol(monthly_avg)], 30)
@@ -469,7 +487,6 @@ clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/COL",
   
   # Write climatology 
   write.csv(climData, paste0(oDir, "/", var, "_climatology_", sY, "_", fY, ".csv"), row.names=F)
-  write.csv(join_names, paste0(oDir, "/stations_names_", var, ".csv"), row.names=F)
   
 }
 
