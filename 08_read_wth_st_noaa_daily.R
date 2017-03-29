@@ -8,11 +8,11 @@ require(raster); require(maptools); require(rgdal)
 
 #Set parameters
 src.dir <- "D:/CIAT/_tools/usaid_hnd"
-var <- "tmax"
+var <- "tmin"
 reg <- "hnd"
 bDir <- "S:/observed/weather_station/ghcn/raw"; setwd(bDir)
 ghcnDir <- paste(bDir,"/daily",sep="")
-outDir <- "W:/01_weather_stations/hnd_noaa/daily_raw/_primary/ghcnd"
+outDir <- "W:/01_weather_stations/hnd_noaa/daily_raw"
 
 # Load main functions 
 source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
@@ -44,7 +44,7 @@ ghcn.dates$ID <- ghcn.rg$ID #stations IDs into dates matrix
 
 # Create output directories
 ddir <- paste(ghcnDir,"/ghcnd_all",sep="")
-odir <- paste(outDir,"/ghcn_", reg, "_", var, sep="")
+odir <- paste(outDir,"/_primary/ghcnd/ghcn_", reg, "_", var, sep="")
 if (!file.exists(odir)) {dir.create(odir, recursive = T)}
 
 #do the snowfall stuff here
@@ -89,36 +89,28 @@ sfStop()
 #ghcn.dates[1,2:(nday+1)] <- wData$PRCP #to put data into complete matrix for that year
 
 
-#  Merge all years in one single file
-stations <- list.dirs(odir, full.names = F)
+#  Merge all years in one single file by station
+stations <- list.dirs(odir, full.names = F, recursive = F)
 stations <- stations[stations != ""]
-
-dates <- seq(as.Date("1960/1/1"), as.Date("2010/12/31"), "days")
-dates = format(dates,"%Y%m%d")
-dates = cbind.data.frame("Date"=dates,"NA")
-
-mat <- as.data.frame(matrix(NA,366,length(stations)))
+outForDir <- paste0(outDir, "/", var, "-per-station")
+if (!file.exists(outForDir)) {dir.create(outForDir, recursive = T)}
 
 for (s in 1:length(stations)){
 
-  years <- list.files(paste0(odir, "/", stations[s]), full.names = F)
-  data <- lapply(paste0(odir, "/", stations[s], "/", years), function(x){read.csv(x, header=T)})
-
+  data <- lapply(paste0(odir, "/", stations[s], "/", yearSeries, ".csv"), function(x){read.csv(x, header=T)})
+  
   allyears <- c()
-
+  
   for (j in 1:length(data)){
-
-    allyears <- rbind(allyears, cbind(paste0(strsplit(years[j],".csv")[1], sprintf("%02d", data[[j]]$MONTH), sprintf("%02d", data[[j]]$DOFM)), data[[j]][,4]))
-
+    
+    allyears <- rbind(allyears, cbind(paste0(yearSeries[j], sprintf("%02d", data[[j]]$MONTH), sprintf("%02d", data[[j]]$DOFM)), data[[j]][,4]))
+    
   }
-
-  names(allyears) <- c("Date", stations[s])
-  datSt <- merge(dates,allyears[[j]],by="Date",all.x=T)
-  datosprecip[,j]=final[,3]
-  mat[,j] = allyears
-
+  
+  cat(" >. Writing", stations[s], var, "\n")
+  colnames(allyears) <- c("Date", "Value")
+  write.table(allyears, paste0(outForDir, "/", tolower(stations[s]), "_raw_", var, ".txt"), row.names=F, quote=F)
+  
 }
-
-
 
 
