@@ -113,4 +113,17 @@ for (s in 1:length(stations)){
   
 }
 
+# Get metadata from GHCN general catalog
+stations <- as.matrix(stations)
+colnames(stations)  <- "ID"
+summary <- merge(stations,  stations.ghcn, by=c("ID"), all=FALSE)
+summary <- cbind(summary, VAR=var)
+
+# Write catalog file
+if (!file.exists(paste0(outDir, "/stations_catalog.csv"))){
+  write.csv(summary, paste0(outDir, "/stations_catalog.csv"), row.names=F)
+} else {
+  write.table(summary, paste0(outDir, "/stations_catalog.csv"), append=T, row.names=F, sep=",", col.names = F)
+}
+
 
