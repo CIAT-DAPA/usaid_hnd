@@ -10,16 +10,15 @@ import datetime
 from shutil import copyfile
 
 #Syntax 
-if len(sys.argv) < 4:
+if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 05_read_wht_st_dgrh_monthly.py W:\\01_weather_stations\\hnd_dgrh\\monthly_raw\\_primary_files\qbasic W:\\01_weather_stations\\hnd_dgrh\\monthly_raw summary"
+	print "   - ie: python 05_read_wht_st_dgrh_monthly.py W:\\01_weather_stations\\hnd_dgrh\\monthly_raw\\_primary_files\\qbasic\\error W:\\01_weather_stations\\hnd_dgrh\\monthly_raw"
 	sys.exit(1)
 
 #Set variables 
 dirbase = sys.argv[1]
 dirout = sys.argv[2]
-summary = sys.argv[3]
 if not os.path.exists(dirout):
     os.system('mkdir ' + dirout)
 
@@ -42,27 +41,33 @@ for stfile in stlist:
 	if int(os.path.getsize(stfile)) > 3000:
 
 		stNumber = os.path.basename(stfile).split("-")[0]
-		errorFile = dirout + "\\error.txt"
 		
-		## Open weather file
-		with open(stfile, 'r') as csvfile:
-			file = csv.reader(csvfile)
-
-			# ## Loop around lines
-			j = 1
+		if stNumber != "a" and stNumber != "c" and stNumber != "h" and stNumber != "CLS" and stNumber != "2014":
+		
+			catFile = dirout + "\\summary.txt"
+			errorFile = dirout + "\\error.txt"
+					
+			# try: 
 			
-			for line in file:
+			## Open weather file
+			with open(stfile, 'r') as csvfile:
+				file = csv.reader(csvfile)
+
+				# ## Loop around lines
+				j = 1
 				
-				try: 
+				for line in file:
+				
 					line = ''.join(line)
 										
 					if not line.find("SECRETARIA") > -1 or not line.find("DIRECCION") > -1 or not line.find("DEPARTAMENTO") > -1:
 						
 						## Read weather info txt plain file
 						if line.find("ESTACION:") > -1:
-							stName = line.replace(" ", "").split("MES:")[0].split(":")[1]
-							month = line.replace(" ", "").split("MES:")[1].split("-")[0]
-							year = line.replace(" ", "").split("MES:")[1].split("-")[1]
+							# print line.replace(".", "-")
+							stName = line.replace(".", "-").replace(" ", "").split("MES:")[0].split(":")[1]
+							month = line.replace(".", "-").replace(" ", "").split("MES:")[1].split("-")[0]
+							year = line.replace(".", "-").replace(" ", "").split("MES:")[1].split("-")[1]
 							
 							if not year.find(".") > -1:
 							
@@ -73,7 +78,7 @@ for stfile in stlist:
 										year = "20" + year
 								
 								## Write catalog file
-								catFile = dirout + "\\" + summary + ".txt"
+								
 								infoSta = stNumber + "\t" + stName + "\t" +  year + "\n"
 								
 								if not os.path.isfile(catFile):
@@ -82,14 +87,9 @@ for stfile in stlist:
 									cFile.write(infoSta)
 									cFile.close()
 								else:
-									cFile = open(catFile, "r")
-									lst = cFile.readlines()
-									lastline = lst[len(lst)-1]
-									if not lastline == infoSta:
-										cFile.close()
-										cFile = open(catFile, "a")
-										cFile.write(infoSta)
-										cFile.close()
+									cFile = open(catFile, "a")
+									cFile.write(infoSta)
+									cFile.close()
 
 								## Close input txt file
 								# file.close()
@@ -102,7 +102,7 @@ for stfile in stlist:
 									print stNumber, stName, year, month
 							
 								## Read and write climate data
-								if len(line[:4].replace(" ", "")) > 0 and len(line[:4].replace(" ", "")) <= 2:
+								if len(line[:4].replace(" ", "")) > 0 and len(line[:4].replace(" ", "")) <= 2 and not line.find("\\") > -1 and not line.find("X") > -1 and not line.find("- 1") > -1:
 									
 									## Get date
 									if int(line[:4]) < 10:
@@ -110,6 +110,7 @@ for stfile in stlist:
 									else:
 										day = str(int(line[:4]))
 									date = str(year) + str(month) + str(day)
+									print date
 									
 									## Get values per variable
 									for i in varDc:
@@ -122,7 +123,7 @@ for stfile in stlist:
 											os.system('mkdir ' + diroutvar)
 										
 										## Write organized txt weather file
-										staFile = diroutvar + "\\" + stNumber.lower() + "_raw_" + var + ".txt"
+										staFile = diroutvar + "\\" + stNumber.lower().zfill(3) + "_raw_" + var + ".txt"
 										if not os.path.isfile(staFile):
 											wFile = open(staFile, "w")
 											wFile.write("Date" + "\t" + "Value" + "\n")
@@ -146,13 +147,13 @@ for stfile in stlist:
 											wFile.close()
 
 					j = j + 1
-				
-				except:
-					if not os.path.isfile(errorFile):
-						cFile = open(catFile, "w")
-						cFile.write(stfile + "\n")
-						cFile.close()
-					else:
-						cFile = open(catFile, "a")
-						cFile.write(stfile + "\n")
-						cFile.close()
+					
+			# except:
+				# if not os.path.isfile(errorFile):
+					# cFile = open(errorFile, "w")
+					# cFile.write(stfile + "\n")
+					# cFile.close()
+				# else:
+					# cFile = open(errorFile, "a")
+					# cFile.write(stfile + "\n")
+					# cFile.close()

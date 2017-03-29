@@ -106,7 +106,7 @@ convertGHCND <- function(id,yr,var,ddir,odir) {
   if (!file.exists(oFile)) {
     nday <- leap(yr)
     bmat <- createBaseMat(nday)
-    wData <- getDataGHCN(id,yr,ddir,bmat)
+    wData <- getDataGHCN(id,yr,ddir,bmat, var)
     
     if (var == "prec") {
       wData$PRCP[which(wData$M=="P")] <- NA
@@ -211,7 +211,15 @@ createDateGrid <- function(year) {
 #Function to create a base matrix with day of year, month and day of month 
 ####################################################################################
 createBaseMat <- function(nday) {
-  baseMat <- data.frame(DAY=1:nday,MONTH=NA,DOFM=NA,PRCP=NA,M=NA,Q=NA,S=NA)
+  
+  if (var == "prec") {
+    baseMat <- data.frame(DAY=1:nday,MONTH=NA,DOFM=NA,PRCP=NA,M=NA,Q=NA,S=NA)
+  } else if (var == "tmax"){
+    baseMat <- data.frame(DAY=1:nday,MONTH=NA,DOFM=NA,TMAX=NA,M=NA,Q=NA,S=NA)
+  } else if (var == "tmin"){
+    baseMat <- data.frame(DAY=1:nday,MONTH=NA,DOFM=NA,TMIN=NA,M=NA,Q=NA,S=NA)
+  }
+  
   if (nday==366) {
     months <- c(rep(1,times=31),rep(2,times=29),rep(3,times=31),rep(4,times=30),rep(5,times=31),
                 rep(6,times=30),rep(7,times=31),rep(8,times=31),rep(9,times=30),rep(10,times=31),
@@ -231,7 +239,7 @@ createBaseMat <- function(nday) {
 #Function to read in the daily data of the station and return a matrix 
 #with quality results and data
 ####################################################################################
-getDataGHCN <- function(id,year,data.dir,base.mat) {
+getDataGHCN <- function(id,year,data.dir,base.mat, var) {
   #year <- 1977 #define year (further this needs to be a loop)
   #data.dir <- paste(ghcnDir,"/ghcnd_all",sep="")
   #base.mat <- baseMat
@@ -245,7 +253,7 @@ getDataGHCN <- function(id,year,data.dir,base.mat) {
     if (var == "prec") {
       stData <- stData[which(stData$VARIABLE=="PRCP"),] #get only precip data
     } else if (var == "tmax"){
-      stData <- stData[which(stData$VARIABLE=="TMAX"),] #get only precip data
+      stData <- stData[which(stData$VARIABLE=="TMAX"),] #get only tmax data
     } else if (var == "tmin"){
       stData <- stData[which(stData$VARIABLE=="TMIN"),] #get only precip data
     }
@@ -256,7 +264,15 @@ getDataGHCN <- function(id,year,data.dir,base.mat) {
       mflag <- apply(base.mat,1,searchData,"M",stData) #get measurement flag
       qflag <- apply(base.mat,1,searchData,"Q",stData) #get quality flag
       sflag <- apply(base.mat,1,searchData,"S",stData) #get source flag
-      base.mat$PRCP <- prcp; base.mat$M <- mflag; base.mat$Q <- qflag; base.mat$S <- sflag
+      
+      if (var == "prec") {
+        base.mat$PRCP <- prcp; base.mat$M <- mflag; base.mat$Q <- qflag; base.mat$S <- sflag
+      } else if (var == "tmax"){
+        base.mat$TMAX <- prcp; base.mat$M <- mflag; base.mat$Q <- qflag; base.mat$S <- sflag
+      } else if (var == "tmin"){
+        base.mat$TMIN <- prcp; base.mat$M <- mflag; base.mat$Q <- qflag; base.mat$S <- sflag
+      }
+      
     }
   }
   return(base.mat)
@@ -392,7 +408,6 @@ mergeDailyGSOD <- function(oDir, ogdir, st_ids, usaf_ids){
 ####################################
 ### Monthly aggregation QC GSOD ####
 ####################################
-
 monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL", oDir = "Z:/DATA/WP2/01_Weather_Stations/COL"){
   
   # Read daily QC data
@@ -437,11 +452,9 @@ monthly_agg <- function(var="prec", bDir = "Z:/DATA/WP2/01_Weather_Stations/COL"
   
 }
 
-
 ##################################
 ### Climatology Calcs GSOD ####
 ##################################
-
 clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/COL", oDir = "Z:/DATA/WP2/01_Weather_Stations/COL", st_loc="Z:/DATA/WP2/01_Weather_Stations/GSOD", sY=1981, fY=2010){
   
   # Read monthly file
