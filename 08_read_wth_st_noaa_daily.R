@@ -1,6 +1,8 @@
-#Julian Ramirez-Villegas
-#UoL / CCAFS / CIAT
-#December 2011
+# Julian Ramirez-Villegas
+# UoL / CCAFS / CIAT
+# December 2011
+# Modified by Carlos Navarro (Mar 2017)
+
 stop("error")
 
 # Set libraries
@@ -120,10 +122,128 @@ summary <- merge(stations,  stations.ghcn, by=c("ID"), all=FALSE)
 summary <- cbind(summary, VAR=var)
 
 # Write catalog file
-if (!file.exists(paste0(outDir, "/stations_catalog.csv"))){
-  write.csv(summary, paste0(outDir, "/stations_catalog.csv"), row.names=F)
+if (!file.exists(paste0(outDir, "/stations_catalog_ghcn.csv"))){
+  write.csv(summary, paste0(outDir, "/stations_catalog_ghcn.csv"), row.names=F)
 } else {
-  write.table(summary, paste0(outDir, "/stations_catalog.csv"), append=T, row.names=F, sep=",", col.names = F)
+  write.table(summary, paste0(outDir, "/stations_catalog_ghcn.csv"), append=T, row.names=F, sep=",", col.names = F)
 }
 
+
+
+
+##############################################################################
+########################### FOR GSOD-Daily ###################################
+##############################################################################
+
+stop("error")
+
+require(raster); require(maptools); require(rgdal)
+src.dir <- "D:/CIAT/_tools/usaid_hnd"
+source(paste(src.dir,"/GHCND-GSOD-functions.R",sep=""))
+
+#base dir
+bDir <- "S:/observed/weather_station/gsod"; setwd(bDir)
+gsodDir <- paste(bDir,"/organized-data",sep="")
+odir <- "W:/01_weather_stations/hnd_noaa/daily_raw"
+reg <- "amz"
+
+#gsod stations
+stations.gsod <- read.csv(paste(gsodDir,"/ish-history.csv",sep=""))
+stations.gsod$LON <- stations.gsod$LON/1000; stations.gsod$LAT <- stations.gsod$LAT/1000
+stations.gsod$ELEV..1M. <- stations.gsod$ELEV..1M./10
+
+#projection extents
+rg.xt <- extent(-90, -82, 12, 17) 
+
+#define initial and final year
+yearSeries <- c(1960:2017)
+
+#select stations within 3+degree of interpolation extents
+gsod.reg <- stations.gsod[which(stations.gsod$LON>=(rg.xt@xmin-1) & stations.gsod$LON<=(rg.xt@xmax+1)
+                                & stations.gsod$LAT>=(rg.xt@ymin-1) & stations.gsod$LAT<=(rg.xt@ymax+1)),]
+st_ids <- paste(gsod.reg$USAF,"-",gsod.reg$WBAN,sep="")
+usaf_ids <- gsod.reg$USAF
+st_loc <- as.data.frame(cbind("Station"=gsod.reg$USAF, "Name"=gsod.reg$STATION.NAME, "Lon"=gsod.reg$LON, "Lat"=gsod.reg$LAT, "Alt"=gsod.reg$ELEV..1M.))
+
+#do the snowfall stuff here
+library(snowfall)
+sfInit(parallel=T,cpus=1) #initiate cluster
+
+#export functions
+sfExport("convertGSOD")
+sfExport("createDateGrid")
+sfExport("leap")
+
+#export variables
+sfExport("bDir")
+
+IDs <- paste("USAF",gsod.reg$USAF,"_WBAN",gsod.reg$WBAN,sep="")
+
+count <- 1
+for (yr in yearSeries) {
+  cat(yr,paste("(",count," out of ",length(yearSeries),")",sep=""),"\n")
+  gdir <- paste(gsodDir,"/",yr,sep="")
+  ogdir <- paste(odir,"/_primary/gsod", sep=""); if (!file.exists(ogdir)) {dir.create(ogdir, recursive=T)}
+  controlConvert <- function(i) { #define a new function
+    convertGSOD(i,yr,gdir,ogdir)
+  }
+  sfExport("yr"); sfExport("gdir"); sfExport("ogdir")
+  system.time(sfSapply(as.vector(IDs), controlConvert))
+  count <- count+1
+}
+
+
+#  Merge all years in one single file by station
+varLs <- c("prec", "tmax", "tmin")
+gsod.reg <- cbind(gsod.reg, ID=st_ids)
+summary <- c()
+
+for (s in 1:length(st_ids)){
+  
+  data <- lapply(list.files(paste0(odir, "/_primary/gsod"), pattern = st_ids[s], full.names = T), function(x){read.csv(x, header=T)})
+  if (length(data) > 0){
+    for (var in varLs){
+      
+      allyears <- c()
+      
+      for (j in 1:length(data)){
+        
+        date_gsod <- format(as.Date(paste0(data[[j]]$YEAR, sprintf("%02d", data[[j]]$MONTH), sprintf("%02d", data[[j]]$DAY)), format="%Y%m%d"),format="%Y%m%d")
+        
+        if (var == "prec"){
+          value <- as.numeric(data[[j]]$RAIN)
+        } else if (var == "tmax") {
+          value <- as.numeric(data[[j]]$TMAX)
+        } else if (var == "tmin") {
+          value <- as.numeric(data[[j]]$TMIN)
+        }
+        
+        st_var <- cbind(date_gsod, value)
+        allyears <- rbind(allyears, st_var)  
+        
+      }
+      
+      outForDir <- paste0(odir, "/", var, "-per-station")
+      if (!file.exists(outForDir)) {dir.create(outForDir, recursive = T)}
+      
+      cat(" >. Writing", st_ids[s], var, "\n")
+      colnames(allyears) <- c("Date", "Value")
+      write.table(allyears, paste0(outForDir, "/", tolower(st_ids[s]), "_raw_", var, ".txt"), row.names=F, quote=F)
+      
+      summary <- rbind(summary, cbind(gsod.reg[which(gsod.reg$ID == st_ids[s]),], VAR=var))
+      
+    }  
+  }
+  
+  
+  
+}
+
+
+# Write catalog file
+if (!file.exists(paste0(outDir, "/stations_catalog_gsod.csv"))){
+  write.csv(summary, paste0(outDir, "/stations_catalog_gsod.csv"), row.names=F)
+} else {
+  write.table(summary, paste0(outDir, "/stations_catalog_gsod.csv"), append=T, row.names=F, sep=",", col.names = F)
+}
 
