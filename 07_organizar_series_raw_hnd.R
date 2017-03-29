@@ -72,11 +72,11 @@ files <-list.files(rutOrigen,pattern="\\.txt$")
 nom.files<-substring(files,1,nchar(files)-13)
 
 idstation=read.csv("X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_raw/catalog_daily_dgrh.csv",header=T) #Cargar base con código y nombre de la estación
-CODIGO=idstation[,1]
+CODIGO=idstation$cod
 
 where <- match( CODIGO,nom.files)
 station_find=nom.files[where[which(!is.na(where))]]
-station_find_n1=idstation[which(where!="NA"),2]
+station_find_n1=paste0(CODIGO,"_",idstation[which(where!="NA"),2])
 
 x=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days") #Definir periodo que se desea analizar
 
