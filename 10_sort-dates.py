@@ -9,7 +9,7 @@ import os, sys, string, glob
 if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python D:\_Scripts\usaid_hnd\10_sort-dates.py X:\Water_Planning_System\01_weather_stations\hnd_dgrh\daily_raw"
+	print "   - ie: python D:\_Scripts\usaid_hnd\10_sort-dates.py X:\Water_Planning_System\01_weather_stations\hnd_dgrh\daily_processed"
 	sys.exit(1)
 
 #Set variables 
