@@ -22,24 +22,28 @@ read_files = function(x,dir_out,var){
   
   for (i in 1:length(rl)){
     f = strsplit(rl[i],split="\\s+")[[1]]
-    if(length(f)==13 || length(f)==14){
+    
+    e = which(f=="-")
+    if(length(e)>0){f = f[-e]}
+    
+   # if(length(f)==13 || length(f)==14){
       
-      if (length(f)==13){
+      if (length(f)==13 & nchar(f[1])>6){
         d_ini [i,1] = substring(f[1],1,nchar(f[1])-2)
         d_ini [i,2] = substring(f[1],nchar(f[1])-1,nchar(f[1]))
         d_ini [i,3:14] = f[2:13]
-      }else{
-        d_ini [i,] = f
       }
-    }else{
-      d_ini [i,] = NA
-    }
+      if(length(f)==14 & nchar(f[1])<=6){
+
+          d_ini [i,] = f
+        }
+    #}
   }
   
   d_ini = na.omit(d_ini)
   d_ini[which(d_ini=="-1.0")] =NA
   d_ini = as.data.frame(d_ini)
-  d_ini [,3:14] = apply(d_ini[-1:-2],2,as.numeric)
+  d_ini [,3:14] = apply(d_ini[,-1:-2],2,as.numeric)
   names(d_ini) = c("code", "day",1:12)
   
   d_fin = melt(d_ini,id.vars = c("code","day"))
@@ -58,7 +62,7 @@ read_files = function(x,dir_out,var){
   d_write = cbind("Date"= Date,"Value" = d_fin$value)
   
   dir.create(paste0(dir_out,"/",var,"-per-station"),showWarnings = F)
-  write.table(d_write,paste0(dir_out,"/",var,"-per-station/",tolower(substring(d_fin[1,1],1,4)),"_raw_",var,".txt"),quote = F,row.names = F)
+  write.table(d_write,paste0(dir_out,"/",var,"-per-station/",tolower(substring(d_fin[1,1],1,4)),"_raw_",var,".txt"),quote = F,row.names = F, sep = "\t")
   
   cat(paste(substring(d_fin[1,1],1,4),"station done! \n",sep = " "))
   return(substring(d_fin[1,1],1,4))
