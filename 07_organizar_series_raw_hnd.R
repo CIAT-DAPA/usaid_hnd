@@ -13,9 +13,9 @@ files <-list.files(rutOrigen,pattern="\\.txt$")
 nom.files<-substring(files,1,nchar(files)-13)
 
 idstation=read.csv("X:/Water_Planning_System/01_weather_stations/hnd_dgrh/monthly_raw/stations_catalog.csv",header=T) #Cargar base con código y nombre de la estación
-CODIGO=idstation[,2]
+cod=idstation[,2]
 
-where <- match( CODIGO,nom.files)
+where <- match( cod,nom.files)
 station_find=nom.files[where[which(!is.na(where))]]
 station_find_n1=idstation[which(where!="NA"),1]
 
@@ -63,8 +63,8 @@ write.csv(precipfin,paste("hnd_precip_all.csv",sep=""),row.names=F)
 
 
 #Daily data
-
-rutOrigen="X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_raw/prec-per-station/" #Ruta donde se encuentran los archivos .txt
+rutOrigen = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_raw_org/prec-per-station/"
+outDir ="X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/prec-per-station/" #Ruta donde se encuentran los archivos .txt
 dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
 
 
@@ -72,18 +72,19 @@ files <-list.files(rutOrigen,pattern="\\.txt$")
 nom.files<-substring(files,1,nchar(files)-13)
 
 idstation=read.csv("X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_raw/catalog_daily_dgrh.csv",header=T) #Cargar base con código y nombre de la estación
-CODIGO=idstation$cod
+cod=as.character(idstation$national_code)
+not_f = which(is.na(cod))
+cod = cod[-not_f]
 
-where <- match( CODIGO,nom.files)
-station_find=nom.files[where[which(!is.na(where))]]
-station_find_n1=paste0(CODIGO,"_",idstation[which(where!="NA"),2])
+where <- match( cod,nom.files)
+station_find_n=paste0(cod,"_",idstation[-not_f,1])
 
 x=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days") #Definir periodo que se desea analizar
 
 fechas=format(x,"%Y%m%d")
 fechas=cbind.data.frame("Date"=fechas,"NA")
 
-Datos <- lapply(paste(rutOrigen,"/",station_find,"_raw_prec.txt",sep=""),function(x){read.table(x,header=T,sep=" ")})
+Datos <- lapply(paste(rutOrigen,cod,"_prec_raw.txt",sep=""),function(x){read.table(x,header=T,sep="\t")})
 
 Rain = Datos
 datosprecip=as.data.frame(matrix(NA,nrow(fechas),length(Rain)))
@@ -113,7 +114,7 @@ day=as.numeric(substr(fechas[,1],7,8))
 
 precipfin=cbind(day,month,year,datosprecip)
 
-names(precipfin)=c("day","month","year",as.character(station_find_n1))
+names(precipfin)=c("day","month","year",as.character(station_find_n))
 
 
 #Se guardan los archivos en formato .csv con la info organizada
