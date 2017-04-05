@@ -1,34 +1,38 @@
-################################################################
+#Created by: Lizeth Llanos
+# This script make the quality control for daily data
+# April 2017
+
+
 # QC daily data
 
-
 inDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/"
-outDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/"
+outDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/"
 
-#dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
+variable = "prec"
+data_station = read.csv(paste0(inDir,variable,"_daily_raw.csv"),header = T)
 
-data_station = read.csv(paste0(inDir,"precip_daily_all.csv"),header = T)
-nomb = names(data_station[,-1:-3])
+nomb = substring(names(data_station[,-1:-3]),2,nchar(names(data_station[,-1:-3])))
 
-apply(data_station,2,summary)
+nomb_s = do.call("rbind",strsplit(nomb,"_"))
+name_st = paste0(nomb_s[,2]," (",nomb_s[,1],")")
+
 dates=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days") #Definir periodo que se desea analizar
 
-graf_line = function(x,y,title,outDir){
-  dir.create(paste0(outDir,"daily_processed/line_graph"),showWarnings = F)
-  png(paste0(outDir,"daily_processed/line_graph/",title,".png"), width = 10, height = 4,units = 'in',res=200)
-  plot(x,y,type="l",xlab="",ylab="Precipitation (mm)",main=title)
-  grid()
-  dev.off()
-  
-  cat(paste0("Gráfico de lineas para la estación ",title,"\n"))
-}
+# graf_line = function(x,y,title,outDir){
+#   dir.create(paste0(outDir,"daily_processed/line_graph"),showWarnings = F)
+#   png(paste0(outDir,"daily_processed/line_graph/",title,".png"), width = 10, height = 4,units = 'in',res=200)
+#   plot(x,y,type="l",xlab="",ylab="Precipitation (mm)",main=title)
+#   grid()
+#   dev.off()
+#   
+#   cat(paste0("Gráfico de lineas para la estación ",title,"\n"))
+# }
 
-lapply(1:(ncol(data_station)-3),function(j) graf_line(dates,data_station[,j+3],nomb[j],outDir))
+#lapply(1:(ncol(data_station)-3),function(j) graf_line(dates,data_station[,j+3],nomb[j],outDir))
 
 
 ######
 
-# variable = "prec"
 # 
 # 
 # tiff(paste0(nomb[i],"_box_month.tiff"),compression = 'lzw',height = 5,width = 10,units="in", res=200)
@@ -43,24 +47,31 @@ lapply(1:(ncol(data_station)-3),function(j) graf_line(dates,data_station[,j+3],n
 # dev.off()
 
 
+add_legend <- function(...) {
+  opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
+              mar=c(0, 0, 0, 0), new=TRUE)
+  on.exit(par(opar))
+  plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+  legend(...)
+}
+minim = 0
+maxim = 300
+ric = 10
 object = data_station
 
-if(svalue(variable)=="precip"){
-  dir.create("Control de calidad/precip",showWarnings=F)
-  
-  
-  porcentajes=matrix(0,ncol(object)-3,6)
-  
-  minim = 0
-  maxim = 300
-  ric = 10
-  
+if(variable=="prec"){
+  dir.create(paste0(outDir,"quality_control"),showWarnings=F)
+  dir.create(paste0(outDir,"quality_control/prec"),showWarnings=F)
+   
   for(i in 1:(ncol(object)-3))
   {
+    cat(paste0("quality_control para la estación "),name_st[i],"\n")
+    na = sum(is.na(object[,i+3]))/length(object[,i+3])    
+    if(na<0.95){
+      
     
     ##QC filtro grueso definido por el usuario
     out_range = which(object[,i+3] < minim | object[,i+3] >maxim)
-    out_range_data = data.frame(out_range,object[out_range,i+3])
     
     if(length(out_range)>0){object[out_range,i+3]<-NA}
     
@@ -68,12 +79,13 @@ if(svalue(variable)=="precip"){
     ##QC datos atípicos con RIC
     x = object[,i+3]
     year = object$year
-    month = month.abb[as.numeric(object$month)]
-    month = factor(month, levels=month.abb)
+    month.abb.s = c("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dec")
+    month = month.abb.s[as.numeric(object$month)]
+    month = factor(month, levels=month.abb.s)
     x[x<=0]= NA
     #svalue(ric)
     
-    val.na = boxplot(x~month,range=10,plot=T)
+    val.na = boxplot(x~month,range=10,plot=F)
     lim_inf.na = c()
     lim_sup.na = c()
     for(j in 1:12){
@@ -84,8 +96,7 @@ if(svalue(variable)=="precip"){
 
     out_atip.na = which(x > lim_sup.na | x < lim_inf.na)
     
-    val.na.y = boxplot(x~year,range=10,plot=T)
-    #svalue(ric)
+    val.na.y = boxplot(x~year,range=10,plot=F)
     year.nam = as.numeric(val.na.y$names)
     
     
@@ -99,16 +110,18 @@ if(svalue(variable)=="precip"){
     
     out_atip.na.y = which(x > lim_sup.na.y | x < lim_inf.na.y)
     
-    out_atip.na_data = data.frame(c(out_atip.na,out_atip.na.y),object[c(out_atip.na,out_atip.na.y),i+3])
+    dir.create(paste0(outDir,"quality_control/prec/boxplot_graph"),showWarnings = F)
+    
+    tiff(paste0(outDir,"quality_control/prec/boxplot_graph/",nomb[i],"_",variable,"_box_graph_qc.tiff"),compression = 'lzw',height = 7,width = 10,units="in", res=150)
+    par(mfrow = c(1,2),oma = c(0, 0, 2, 0),las=1)
+    boxplot(x~year,range=10,xlab = "Precipitación (mm/día)",horizontal=T,cex.axis=0.8,main = "Distribución anual")
+    boxplot(x~month,range=10,xlab = "Precipitación (mm/día)",horizontal=T,cex.axis=0.8,main = "Distribución mensual")
+    title(name_st[i],outer = T)
+    dev.off()
+    
     object[c(out_atip.na,out_atip.na.y),i+3]<-NA
     
-    out_atip_data = na.omit(cbind(object[c(out_atip,out_atip.y),1:3],object[c(out_atip,out_atip.y),i+3]))
-    colnames(out_atip_data)<-c("day","month","year","value")
     
-    
-    if(nrow(out_atip_data)!=0){
-      write.csv_n(out_atip_data,paste("Control de calidad/precip/","atipicos_",station[i],".csv",sep=""),row.names=F)
-    }
     ##QC datos consecutivos 
     xc <-data.frame(hasta=cumsum(rle(object[,i+3])$lengths),cant_iguales=rle(object[,i+3])$lengths,valor=rle(object[,i+3])$values)
     xc$desde = xc$hasta -xc$cant_iguales + 1  
@@ -124,45 +137,48 @@ if(svalue(variable)=="precip"){
       }
     }
     
-    out_cons_data = data.frame(out_cons,object[out_cons,i+3])
-    
     if(length(out_cons)>0){object[out_cons,i+3]<-NA}
     
-    #na=descriptna(object[,i+3])
+     #######Graficos quality_control###########
+     
+   
+    dir.create(paste0(outDir,"quality_control/prec/line_graph"),showWarnings = F)
+    tiff(paste0(outDir,"quality_control/prec/line_graph/",nomb[i],"_",variable,"_line_graph_qc.tiff"),compression = 'lzw',height = 7,width = 16,units="in", res=150)
+ 
+        par(mfrow = c(2,1),     # 2x2 layout
+        oma = c(2, 2, 0, 0), # two rows of text at the outer left and bottom margin
+        mar = c(4, 4, 3, 3), # space for one row of text at ticks and to separate plots
+        xpd = NA) 
+   
+        ylim1 = c(min(data_station[,i+3],na.rm=T) ,max(data_station[,i+3],na.rm=T)+0.5)
+        ylim2 = c(min(object[,i+3],na.rm=T) ,max(object[,i+3],na.rm=T)+0.5)
     
-    porcentajes[i,]=cbind(round((dim(out_range_data)[1]/dim(tmax)[1])*100,2),round((dim(out_atip_data)[1]/dim(tmax)[1])*100),round((dim(out_cons_data)[1]/dim(tmax)[1])*100,2),
-                          round(na/dim(tmax)[1]*100,2))
+    plot(data_station[,i+3],type="l",col="grey",xaxt="n",yaxt="n",xlab="",ylab="Precipitación (mm/día)",main = "Antes del control de calidad",ylim=ylim1,cex.lab=0.8)
     
-    #######Graficos control de calidad###########
-    #paste("Control de calidad/precip/","precip_qc_",station[i],".tiff",sep="")
-    tiff("prueba.tiff",compression = 'lzw',height = 7,width = 16,units="in", res=150)
-   # x11()
-    par(mfrow = c(2,1),
-             #oma = c(5,4,0,0) + 0.5,
-        mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-        #,mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-    
-    plot(data_station[,i+3],type="l",col="grey",xaxt="n",xlab="",ylab="Precipitación (mm)",main = nomb[i])
-    mtext("before quality control")
+    mtext(paste0("Estación ",name_st[i]),side=3,outer=T,adj=0,line=-1.3,cex = 1.2) 
+    points(out_range,data_station[out_range,i+3],col="black",bg="green",cex=0.7,pch=21)
     points(out_cons,data_station[out_cons,i+3],col="black",bg="red",cex=0.7,pch=21)
     points(c(out_atip.na.y,out_atip.na),data_station[c(out_atip.na.y,out_atip.na),i+3],col="black",bg="purple",cex=0.7,pch=21)
-    points(out_range,data_station[out_range,i+3],col="black",bg="green",cex=0.7,pch=21)
-    axis(1,at=seq(1,nrow(data_station),1095),labels=seq(min(data_station$year),max(data_station$year),3),las=1,col="black")
+    axis(1,at=seq(1,nrow(data_station),366),labels=seq(min(data_station$year),max(data_station$year),1),las=1,col="black",las =2,cex.axis = 0.8)
+    axis(2,at=seq(ylim1[1],ylim1[2],100),labels=seq(ylim1[1],ylim1[2],100),las=1,col="black",las =1,cex.axis = 0.8)
     
-    legend("topright", inset=c(-0.12,0),c("Consecutivos","Atípicos","Fuera del rango"),
-           pch=c(21,21,21),col="black",pt.bg= c("red","purple","green"),bty = "n")
     
-    plot(object[,i+3],type="l",col="grey",xaxt="n",xlab="",ylab="Precipitación (mm)",main = nomb[i])
-    mtext("after quality control")
-    axis(1,at=seq(1,nrow(data_station),1095),labels=seq(min(data_station$year),max(data_station$year),3),las=1,col="black")
+    plot(object[,i+3],type="l",col="grey",xaxt="n",yaxt="n",xlab="",ylab="Precipitación (mm/día)",main = "Después del control de calidad",ylim=ylim2,cex.lab=0.8)
     
+    axis(1,at=seq(1,nrow(data_station),366),labels=seq(min(data_station$year),max(data_station$year),1),las=1,col="black",las =2,cex.axis = 0.8)
+    axis(2,at=seq(ylim2[1],ylim2[2],20),labels=seq(ylim2[1],ylim2[2],20),las=1,col="black",las =1,cex.axis = 0.8)
+    
+    add_legend("bottomright", legend=c("Datos consecutivos","Datos atípicos","Datos por fuera del rango"), pch=c(21,21,21), 
+               pt.bg= c("red","purple","green"),bty = "n",cex = 0.9,
+               horiz=TRUE)
     
     dev.off()
   }
   
-  write.csv_n(object,"Control de calidad/precip_qc.csv",row.names=F)
-  dimnames(porcentajes)<-c(list(station),list(c("% Datos fuera del rango","% Datos atípicos","% Datos consecutivos","% Total datos NA")))
-  
+  }
+  names(object)[-3:-1] = nomb
+  write.csv(object,paste0(outDir,"prec_daily_qc.csv"),row.names = F,quote = F)
+   
 }
 
 
