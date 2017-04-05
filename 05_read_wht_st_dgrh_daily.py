@@ -13,7 +13,7 @@ from shutil import copyfile
 if len(sys.argv) < 3:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 05_read_wht_st_dgrh_monthly.py W:\\01_weather_stations\\hnd_dgrh\\monthly_raw\\_primary_files\\qbasic\\error W:\\01_weather_stations\\hnd_dgrh\\monthly_raw"
+	print "   - ie: python 05_read_wht_st_dgrh_monthly.py W:\\01_weather_stations\\hnd_dgrh\\daily_raw\\_primary_files\\qbasic\\error W:\\01_weather_stations\\hnd_dgrh\\daily_raw"
 	sys.exit(1)
 
 #Set variables 
