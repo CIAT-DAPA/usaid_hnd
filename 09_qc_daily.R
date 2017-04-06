@@ -1,52 +1,32 @@
-#Created by: Lizeth Llanos
+# Created by: Lizeth Llanos
 # This script make the quality control for daily data
 # April 2017
 
-
-# QC daily data
-
+# Define input and ouput path
 inDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/"
 outDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/"
 
-variable = "prec"
+# Load data base with all raw stations
 data_station = read.csv(paste0(inDir,variable,"_daily_raw.csv"),header = T)
 
+# Extract stations names
 nomb = substring(names(data_station[,-1:-3]),2,nchar(names(data_station[,-1:-3])))
-
 nomb_s = do.call("rbind",strsplit(nomb,"_"))
 name_st = paste0(nomb_s[,2]," (",nomb_s[,1],")")
 
-dates=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days") #Definir periodo que se desea analizar
+# Define period from data
+dates=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days") 
 
-# graf_line = function(x,y,title,outDir){
-#   dir.create(paste0(outDir,"daily_processed/line_graph"),showWarnings = F)
-#   png(paste0(outDir,"daily_processed/line_graph/",title,".png"), width = 10, height = 4,units = 'in',res=200)
-#   plot(x,y,type="l",xlab="",ylab="Precipitation (mm)",main=title)
-#   grid()
-#   dev.off()
-#   
-#   cat(paste0("Gráfico de lineas para la estación ",title,"\n"))
-# }
+# Define variable
+variable = "prec"
 
-#lapply(1:(ncol(data_station)-3),function(j) graf_line(dates,data_station[,j+3],nomb[j],outDir))
+# Define range of variable
+minim = 0
+maxim = 300
+ric = 10
 
 
-######
-
-# 
-# 
-# tiff(paste0(nomb[i],"_box_month.tiff"),compression = 'lzw',height = 5,width = 10,units="in", res=200)
-# par(mfrow=c(2,1),
-#     oma = c(5,4,0,0) + 0.1,
-#     mar = c(0,0,1,1) + 1.5)
-# boxplot(x~month,range=as.numeric(5),plot=T)
-# 
-# plot(dates,x,type="l")
-# lines(dates,data_station$lim_inf,col="red",lty=2)
-# lines(dates,data_station$lim_sup,col="red",lty=2)
-# dev.off()
-
-
+# Function for legend outside plot
 add_legend <- function(...) {
   opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
               mar=c(0, 0, 0, 0), new=TRUE)
@@ -54,9 +34,8 @@ add_legend <- function(...) {
   plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
   legend(...)
 }
-minim = 0
-maxim = 300
-ric = 10
+
+# Start qc process
 object = data_station
 
 if(variable=="prec"){
@@ -182,4 +161,35 @@ if(variable=="prec"){
 }
 
 
+
+
+
+
+# graf_line = function(x,y,title,outDir){
+#   dir.create(paste0(outDir,"daily_processed/line_graph"),showWarnings = F)
+#   png(paste0(outDir,"daily_processed/line_graph/",title,".png"), width = 10, height = 4,units = 'in',res=200)
+#   plot(x,y,type="l",xlab="",ylab="Precipitation (mm)",main=title)
+#   grid()
+#   dev.off()
+#   
+#   cat(paste0("Gráfico de lineas para la estación ",title,"\n"))
+# }
+
+#lapply(1:(ncol(data_station)-3),function(j) graf_line(dates,data_station[,j+3],nomb[j],outDir))
+
+
+######
+
+# 
+# 
+# tiff(paste0(nomb[i],"_box_month.tiff"),compression = 'lzw',height = 5,width = 10,units="in", res=200)
+# par(mfrow=c(2,1),
+#     oma = c(5,4,0,0) + 0.1,
+#     mar = c(0,0,1,1) + 1.5)
+# boxplot(x~month,range=as.numeric(5),plot=T)
+# 
+# plot(dates,x,type="l")
+# lines(dates,data_station$lim_inf,col="red",lty=2)
+# lines(dates,data_station$lim_sup,col="red",lty=2)
+# dev.off()
 
