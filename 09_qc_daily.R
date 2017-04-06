@@ -6,6 +6,9 @@
 inDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/"
 outDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/"
 
+# Define variable
+variable = "prec"
+
 # Load data base with all raw stations
 data_station = read.csv(paste0(inDir,variable,"_daily_raw.csv"),header = T)
 
@@ -17,8 +20,6 @@ name_st = paste0(nomb_s[,2]," (",nomb_s[,1],")")
 # Define period from data
 dates=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days") 
 
-# Define variable
-variable = "prec"
 
 # Define range of variable
 minim = 0
@@ -45,16 +46,15 @@ if(variable=="prec"){
   for(i in 1:(ncol(object)-3))
   {
     cat(paste0("quality_control para la estación "),name_st[i],"\n")
-    na = sum(is.na(object[,i+3]))/length(object[,i+3])    
-    if(na<0.95){
-      
-    
+     
     ##QC filtro grueso definido por el usuario
     out_range = which(object[,i+3] < minim | object[,i+3] >maxim)
-    
     if(length(out_range)>0){object[out_range,i+3]<-NA}
     
+    na = sum(is.na(object[,i+3]))/length(object[,i+3])    
     
+    if(na<0.95){
+      
     ##QC datos atípicos con RIC
     x = object[,i+3]
     year = object$year
