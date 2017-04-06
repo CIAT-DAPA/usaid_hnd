@@ -160,7 +160,7 @@ if(variable=="prec"){
     points(out_cons,data_station[out_cons,i+3],col="black",bg="red",cex=0.7,pch=21)
     points(c(out_atip.na.y,out_atip.na),data_station[c(out_atip.na.y,out_atip.na),i+3],col="black",bg="purple",cex=0.7,pch=21)
     axis(1,at=seq(1,nrow(data_station),366),labels=seq(min(data_station$year),max(data_station$year),1),las=1,col="black",las =2,cex.axis = 0.8)
-    axis(2,at=seq(ylim1[1],ylim1[2],100),labels=seq(ylim1[1],ylim1[2],100),las=1,col="black",las =1,cex.axis = 0.8)
+    axis(2,at=seq(ylim1[1],ylim1[2],50),labels=seq(ylim1[1],ylim1[2],50),las=1,col="black",las =1,cex.axis = 0.8)
     
     
     plot(object[,i+3],type="l",col="grey",xaxt="n",yaxt="n",xlab="",ylab="Precipitación (mm/día)",main = "Después del control de calidad",ylim=ylim2,cex.lab=0.8)

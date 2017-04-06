@@ -118,4 +118,4 @@ names(precipfin)=c("day","month","year",as.character(station_find_n))
 
 
 #Se guardan los archivos en formato .csv con la info organizada
-write.csv(precipfin,paste("X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/precip_daily_all.csv",sep=""),row.names=F)
+write.csv(precipfin,paste("X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_processed/prec_daily_raw.csv",sep=""),row.names=F)
