@@ -92,40 +92,45 @@ sfStop()
 
 
 #  Merge all years in one single file by station
-stations <- list.dirs(odir, full.names = F, recursive = F)
-stations <- stations[stations != ""]
-outForDir <- paste0(outDir, "/", var, "-per-station")
-if (!file.exists(outForDir)) {dir.create(outForDir, recursive = T)}
+varLs <- c("prec", "tmax", "tmin")
 
-for (s in 1:length(stations)){
-
-  data <- lapply(paste0(odir, "/", stations[s], "/", yearSeries, ".csv"), function(x){read.csv(x, header=T)})
+for(var in varLs){
+  stations <- list.dirs(odir, full.names = F, recursive = F)
+  stations <- stations[stations != ""]
+  outForDir <- paste0(outDir, "/", var, "-per-station")
+  if (!file.exists(outForDir)) {dir.create(outForDir, recursive = T)}
   
-  allyears <- c()
-  
-  for (j in 1:length(data)){
+  for (s in 1:length(stations)){
     
-    allyears <- rbind(allyears, cbind(paste0(yearSeries[j], sprintf("%02d", data[[j]]$MONTH), sprintf("%02d", data[[j]]$DOFM)), data[[j]][,4]))
+    data <- lapply(paste0(odir, "/", stations[s], "/", yearSeries, ".csv"), function(x){read.csv(x, header=T)})
+    
+    allyears <- c()
+    
+    for (j in 1:length(data)){
+      
+      allyears <- rbind(allyears, cbind(paste0(yearSeries[j], sprintf("%02d", data[[j]]$MONTH), sprintf("%02d", data[[j]]$DOFM)), data[[j]][,4]))
+      
+    }
+    
+    cat(" >. Writing", stations[s], var, "\n")
+    colnames(allyears) <- c("Date", "Value")
+    write.table(allyears, paste0(outForDir, "/", tolower(stations[s]), "_raw_", var, ".txt"), row.names=F, quote=F, sep="\t")
     
   }
   
-  cat(" >. Writing", stations[s], var, "\n")
-  colnames(allyears) <- c("Date", "Value")
-  write.table(allyears, paste0(outForDir, "/", tolower(stations[s]), "_raw_", var, ".txt"), row.names=F, quote=F)
+  # Get metadata from GHCN general catalog
+  stations <- as.matrix(stations)
+  colnames(stations)  <- "ID"
+  summary <- merge(stations,  stations.ghcn, by=c("ID"), all=FALSE)
+  summary <- cbind(summary, VAR=var)
   
-}
-
-# Get metadata from GHCN general catalog
-stations <- as.matrix(stations)
-colnames(stations)  <- "ID"
-summary <- merge(stations,  stations.ghcn, by=c("ID"), all=FALSE)
-summary <- cbind(summary, VAR=var)
-
-# Write catalog file
-if (!file.exists(paste0(outDir, "/stations_catalog_ghcn.csv"))){
-  write.csv(summary, paste0(outDir, "/stations_catalog_ghcn.csv"), row.names=F)
-} else {
-  write.table(summary, paste0(outDir, "/stations_catalog_ghcn.csv"), append=T, row.names=F, sep=",", col.names = F)
+  # Write catalog file
+  if (!file.exists(paste0(outDir, "/stations_catalog_ghcn.csv"))){
+    write.csv(summary, paste0(outDir, "/stations_catalog_ghcn.csv"), row.names=F)
+  } else {
+    write.table(summary, paste0(outDir, "/stations_catalog_ghcn.csv"), append=T, row.names=F, sep=",", col.names = F)
+  }
+  
 }
 
 
@@ -228,7 +233,7 @@ for (s in 1:length(st_ids)){
       
       cat(" >. Writing", st_ids[s], var, "\n")
       colnames(allyears) <- c("Date", "Value")
-      write.table(allyears, paste0(outForDir, "/", tolower(st_ids[s]), "_raw_", var, ".txt"), row.names=F, quote=F)
+      write.table(allyears, paste0(outForDir, "/", tolower(st_ids[s]), "_raw_", var, ".txt"), row.names=F, quote=F, sep="\t")
       
       summary <- rbind(summary, cbind(gsod.reg[which(gsod.reg$ID == st_ids[s]),], VAR=var))
       

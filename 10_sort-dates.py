@@ -9,7 +9,7 @@ import os, sys, string, glob
 if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python D:\_Scripts\usaid_hnd\10_sort-dates.py X:\Water_Planning_System\01_weather_stations\hnd_dgrh\daily_processed"
+	print "   - ie: python 10_sort-dates.py W:\01_weather_stations\hnd_dgrh\daily_raw_org"
 	sys.exit(1)
 
 #Set variables 
@@ -24,7 +24,7 @@ print "     Sort by date ideam daily files		"
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "\n"
 
-varlist = "evap", "prec", "rhum", "sbright", "tmax", "tmean", "tmin", "wsmean", "wsmeand", "wsmax", "wtotal"
+varlist = "evap", "rhum", "sbright", "tmax", "tmean", "tmin", "wsmean", "wsmeand", "wsmax", "wtotal"
 # varlist = "evap", "prec", "srad", "sradv", "tmax", "tmin", "wsmean"
 
 # for var in varlist:
