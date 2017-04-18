@@ -10,13 +10,15 @@
 ###################################
 variable = c("prec","tmax","tmin")
 
-rutOrigen = paste0("X:/Water_Planning_System/01_weather_stations/hnd_all/daily_raw/",variable,"-per-station/") #Ruta donde se encuentran los archivos .txt
+inDir = "X:/Water_Planning_System/01_weather_stations/hnd_all/daily_raw/"
 outDir ="X:/Water_Planning_System/01_weather_stations/hnd_all/" 
 rutCat = "X:/Water_Planning_System/01_weather_stations/catalog_daily.csv"
 
 time_period=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days")
 
-organize_data = function(rutOrigen,outDir,rutCat,variable,time_period){
+organize_data = function(inDir,outDir,rutCat,variable,time_period){
+ 
+  rutOrigen = paste0(inDir,variable,"-per-station/")
   dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
   
   files <-list.files(rutOrigen,pattern="\\.txt$")
@@ -38,12 +40,13 @@ organize_data = function(rutOrigen,outDir,rutCat,variable,time_period){
   fechas=format(time_period,"%Y%m%d")
   fechas=cbind.data.frame("Date"=fechas,"NA")
   
+  cat("Leyendo datos para cada estación... \n")
   Datos <- lapply(paste(rutOrigen,cod[which(!is.na(where))],"_raw_",variable,".txt",sep=""),function(x){read.table(x,header=T,sep="\t")})
   
   datos_to=as.data.frame(matrix(NA,nrow(fechas),length(Datos)))
   
   
-  
+  cat("Organizando todos los datos en un solo archivo... \n")
   for(j in 1:length(Datos)) {  
     
     old=na.omit(Datos[[j]])
@@ -69,13 +72,13 @@ organize_data = function(rutOrigen,outDir,rutCat,variable,time_period){
   
   names(datos_fin)=c("day","month","year",as.character(station_find_n))
   
-  
+  cat("Escribiendo datos en .csv... \n")
   #Se guardan los archivos en formato .csv con la info organizada
   write.csv(datos_fin,paste(outDir,"/daily_processed/",variable,"_daily_raw.csv",sep=""),row.names=F)
-  
+  cat("Proceso finalizado! \n")
 }
 
-for(j in 1:length(variable)) organize_data(rutOrigen,outDir,rutCat,variable[j],time_period)
+for(j in 1:length(variable)) organize_data(inDir,outDir,rutCat,variable[j],time_period)
 
 
 
