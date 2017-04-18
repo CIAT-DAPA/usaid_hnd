@@ -82,7 +82,6 @@ for(j in 1:length(variable)) organize_data(inDir,outDir,rutCat,variable[j],time_
 
 
 
-
 ##################################
 #-------Monthly data-------------#
 ##################################
