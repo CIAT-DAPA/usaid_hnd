@@ -13,14 +13,14 @@ variable = c("prec","tmax","tmin")
 inDir = "X:/Water_Planning_System/01_weather_stations/hnd_all/daily_raw/"
 outDir ="X:/Water_Planning_System/01_weather_stations/hnd_all/" 
 rutCat = "X:/Water_Planning_System/01_weather_stations/catalog_daily.csv"
+dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
 
 time_period=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days")
 
 organize_data = function(inDir,outDir,rutCat,variable,time_period){
  
   rutOrigen = paste0(inDir,variable,"-per-station/")
-  dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
-  
+    
   files <-list.files(rutOrigen,pattern="\\.txt$")
   nom.files<-substring(files,1,nchar(files)-13)
   
@@ -40,7 +40,7 @@ organize_data = function(inDir,outDir,rutCat,variable,time_period){
   fechas=format(time_period,"%Y%m%d")
   fechas=cbind.data.frame("Date"=fechas,"NA")
   
-  cat("Leyendo datos para cada estación... \n")
+  cat("Leyendo datos para cada estación de ",variable,"... \n")
   Datos <- lapply(paste(rutOrigen,cod[which(!is.na(where))],"_raw_",variable,".txt",sep=""),function(x){read.table(x,header=T,sep="\t")})
   
   datos_to=as.data.frame(matrix(NA,nrow(fechas),length(Datos)))
