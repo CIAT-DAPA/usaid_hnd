@@ -21,11 +21,13 @@ outDir = paste0("X:/Water_Planning_System/01_weather_stations/hnd_all/daily_proc
 
 # Load data base with all raw stations catalog with lat and long
 data_station.ini = read.csv(paste0(inDir,variable,"_daily_qc.csv"),header = T)
+
 catalog = read.csv("X:/Water_Planning_System/01_weather_stations/catalog_daily.csv",header = T)
 catalog = catalog[which(catalog$variable==variable),]
 
 # Define period from data
 dates=seq(as.Date("2001/1/1"), as.Date("2016/12/31"), "days") 
+
 data_station = data_station.ini[which(data_station.ini$year %in% as.numeric(unique(format(dates,"%Y")))),]
 
 # Extract stations names
