@@ -51,27 +51,27 @@ dir.create(paste0(outDir,"/monthly_processed/tmin"))
 dir.create(paste0(outDir,"/monthly_processed/prec"))
 
 
-write.csv(monthly_tmax,paste0(outDir,"/monthly_processed/monthly_tmax.csv"),row.names = F)
-write.csv(monthly_tmin,paste0(outDir,"/monthly_processed/monthly_tmin.csv"),row.names = F)
-write.csv(monthly_prec,paste0(outDir,"/monthly_processed/monthly_prec.csv"),row.names = F)
+write.csv(monthly_tmax,paste0(outDir,"/monthly_processed/tmax/monthly_tmax.csv"),row.names = F)
+write.csv(monthly_tmin,paste0(outDir,"/monthly_processed/tmin/monthly_tmin.csv"),row.names = F)
+write.csv(monthly_prec,paste0(outDir,"/monthly_processed/prec/monthly_prec.csv"),row.names = F)
 
 
 #Filter stations with na<=0.2
 na = function(x) { na = sum(is.na(x))/length(x)
-  return(na)}
+                    return(na)}
 
 na_prec = apply(monthly_prec,2,na)
-monthly_prec_f = monthly_prec[which(na_prec<=0.4),]
+monthly_prec_f = monthly_prec[,which(na_prec<=0.4)]
 
 monthly_tmax = monthly_tmax[monthly_tmax$year %in% 1997:2016,]
 na_tmax = apply(monthly_tmax,2,na)
-monthly_tmax_f = monthly_tmax[which(na_tmax<=0.3),]
+monthly_tmax_f = monthly_tmax[,which(na_tmax<=0.4)]
 
 monthly_tmin = monthly_tmin[monthly_tmin$year %in% 1997:2016,]
 na_tmin = apply(monthly_tmin,2,na)
-monthly_tmin_f = monthly_tmin[which(na_tmin<=0.3),]
+monthly_tmin_f = monthly_tmin[,which(na_tmin<=0.4)]
 
 
-write.csv(monthly_tmax,paste0(outDir,"/monthly_processed/monthly_tmax.csv"),row.names = F)
-write.csv(monthly_tmin,paste0(outDir,"/monthly_processed/monthly_tmin.csv"),row.names = F)
-write.csv(monthly_prec,paste0(outDir,"/monthly_processed/monthly_prec.csv"),row.names = F)
+write.csv(monthly_tmax_f,paste0(outDir,"/monthly_processed/tmax/filter_monthly_tmax.csv"),row.names = F)
+write.csv(monthly_tmin_f,paste0(outDir,"/monthly_processed/tmin/filter_monthly_tmin.csv"),row.names = F)
+write.csv(monthly_prec_f,paste0(outDir,"/monthly_processed/prec/filter_monthly_prec.csv"),row.names = F)
