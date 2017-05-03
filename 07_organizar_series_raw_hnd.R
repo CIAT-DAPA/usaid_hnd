@@ -8,16 +8,7 @@
 ###################################
 #---------Daily data--------------#
 ###################################
-variable = c("prec","tmax","tmin")
-
-inDir = "X:/Water_Planning_System/01_weather_stations/hnd_all/daily_raw/"
-outDir ="X:/Water_Planning_System/01_weather_stations/hnd_all/" 
-rutCat = "X:/Water_Planning_System/01_weather_stations/catalog_daily.csv"
-dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
-
-time_period=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days")
-
-organize_data = function(inDir,outDir,rutCat,variable,time_period){
+organize_data = function(inDir,outDir,rutCat,variable,time_period,inst=NULL){
  
   rutOrigen = paste0(inDir,variable,"-per-station/")
     
@@ -26,7 +17,10 @@ organize_data = function(inDir,outDir,rutCat,variable,time_period){
   
   idstation = read.csv(rutCat,header=T) #Cargar base con código y nombre de la estación
   idstation = idstation[which(idstation$variable==variable),]
-  
+  if(!is.null(inst)){ 
+       idstation = idstation[which(idstation$operator==inst),]
+    }
+   
   cod=as.character(idstation$national_code)
   # not_f = which(is.na(cod))
   # cod = cod[-not_f]
@@ -78,8 +72,32 @@ organize_data = function(inDir,outDir,rutCat,variable,time_period){
   cat("Proceso finalizado! \n")
 }
 
+
+##Run para datos DGRH
+variable = c("prec","tmax","tmin")
+
+inDir = "X:/Water_Planning_System/01_weather_stations/hnd_all/daily_raw/"
+outDir ="X:/Water_Planning_System/01_weather_stations/hnd_all/" 
+rutCat = "X:/Water_Planning_System/01_weather_stations/catalog_daily.csv"
+dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
+
+time_period=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days")
+
+
 for(j in 1:length(variable)) organize_data(inDir,outDir,rutCat,variable[j],time_period)
 
+##Run para datos ENEE
+variable = c("prec","tmax","tmin")
+
+inDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_raw/"
+outDir ="X:/Water_Planning_System/01_weather_stations/hnd_enee/" 
+rutCat = "X:/Water_Planning_System/01_weather_stations/catalog_daily.csv"
+dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
+
+time_period=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days")
+
+j=1
+organize_data(inDir,outDir,rutCat,variable[j],time_period,inst="ENEE")
 
 
 ##################################
