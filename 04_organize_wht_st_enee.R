@@ -16,6 +16,7 @@ stcat <- read.csv("W:/01_weather_stations/hnd_enee/daily_raw/stations_catalog_v2
 
 # List of the stations in xlsx format
 stLs <- list.files(iDir, pattern = "xlsx")
+cat_sel <- c()
 
 for (st in stLs){
   
@@ -28,9 +29,12 @@ for (st in stLs){
   stCode <- paste(merge$COD_NAC)
   
   cat(stName, "\t",stCode, "\n")
-  stRead <- readWorksheet(loadWorkbook(paste0(iDir, "/", st)), sheet ="Diaria", header = T)
-  write.table(stRead, paste0(iDir, "/", stCode, ".txt"), quote = F, row.names = F, sep="\t", na = "")
-  
+  # stRead <- readWorksheet(loadWorkbook(paste0(iDir, "/", st)), sheet ="Diaria", header = T)
+  # write.table(stRead, paste0(iDir, "/", stCode, ".txt"), quote = F, row.names = F, sep="\t", na = "")
+  # 
+  cat_sel <- rbind(cat_sel, merge)
   
 }
+
+write.csv(cat_sel, "W:/01_weather_stations/hnd_enee/daily_raw/stations_catalog_v2_sel.csv", quote = F, row.names = F)
   

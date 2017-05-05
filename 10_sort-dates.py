@@ -24,7 +24,7 @@ print "     Sort by date ideam daily files		"
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "\n"
 
-varlist = "prec", "tmax"
+varlist = "tmax", "tmin"
 # varlist = "evap", "rhum", "sbright", "tmax", "tmean", "tmin", "wsmean", "wsmeand", "wsmax", "wtotal"
 # varlist = "evap", "prec", "srad", "sradv", "tmax", "tmin", "wsmean"
 
