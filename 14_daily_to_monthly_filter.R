@@ -32,8 +32,8 @@ sum22=function(a,na.rm=T){
 # precip=read.table("clipboard",header = T)
 # tmax=read.table("clipboard",header = T)
 # tmin=read.table("clipboard",header = T)
-inDir = "X:/Water_Planning_System/01_weather_stations/hnd_all/daily_processed/"
-outDir = "X:/Water_Planning_System/01_weather_stations/hnd_all/"
+inDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_processed/"
+outDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/"
 
 tmax = read.csv(paste0(inDir,"tmax_daily_qc.csv"),header = T)
 tmin = read.csv(paste0(inDir,"tmin_daily_qc.csv"),header = T)
@@ -63,11 +63,11 @@ na = function(x) { na = sum(is.na(x))/length(x)
 na_prec = apply(monthly_prec,2,na)
 monthly_prec_f = monthly_prec[,which(na_prec<=0.4)]
 
-monthly_tmax = monthly_tmax[monthly_tmax$year %in% 1997:2016,]
+#monthly_tmax = monthly_tmax[monthly_tmax$year %in% 1997:2016,]
 na_tmax = apply(monthly_tmax,2,na)
 monthly_tmax_f = monthly_tmax[,which(na_tmax<=0.4)]
 
-monthly_tmin = monthly_tmin[monthly_tmin$year %in% 1997:2016,]
+#monthly_tmin = monthly_tmin[monthly_tmin$year %in% 1997:2016,]
 na_tmin = apply(monthly_tmin,2,na)
 monthly_tmin_f = monthly_tmin[,which(na_tmin<=0.4)]
 

@@ -9,14 +9,14 @@ library(rgeos)
 library(reshape)
 
 # Define variable
- variable = "tmax"
-# variable = "tmin"
+# variable = "tmax"
+ variable = "tmin"
 # variable = "prec"
 
 
 # Define input and ouput path
-inDir = "X:/Water_Planning_System/01_weather_stations/hnd_all/daily_processed/"
-outDir = paste0("X:/Water_Planning_System/01_weather_stations/hnd_all/daily_processed/quality_control/",variable,"/")
+inDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_processed/"
+outDir = paste0("X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_processed/quality_control/",variable,"/")
 
 
 # Load data base with all raw stations catalog with lat and long
@@ -24,9 +24,10 @@ data_station.ini = read.csv(paste0(inDir,variable,"_daily_qc.csv"),header = T)
 
 catalog = read.csv("X:/Water_Planning_System/01_weather_stations/catalog_daily.csv",header = T)
 catalog = catalog[which(catalog$variable==variable),]
+catalog = catalog[which(catalog$operator=="ENEE"),]
 
 # Define period from data
-dates=seq(as.Date("2001/1/1"), as.Date("2016/12/31"), "days") 
+dates=seq(as.Date("1990/1/1"), as.Date("2016/12/31"), "days") 
 
 data_station = data_station.ini[which(data_station.ini$year %in% as.numeric(unique(format(dates,"%Y")))),]
 
@@ -44,7 +45,7 @@ summary_st$lat =catalog$latitudeDD
 summary_st$long =catalog$longitudeDD
 
 rownames(summary_st) = NULL
-#write.csv(summary_st,paste0(outDir,"summary_all_st_",variable,"_qc.csv"),row.names = F,quote = F)
+write.csv(summary_st,paste0(outDir,"summary_all_st_",variable,"_qc.csv"),row.names = F,quote = F)
 
 summary_st$datos_faltantes = as.numeric(as.character(summary_st$datos_faltantes))*100
 
@@ -94,7 +95,7 @@ map_na = function(summary_st,years,variable,outDir,shape_dir){
                  axis.title=element_text(colour="black",size=12,face="bold"))
   
   p <- p +labs(title = paste0("Datos faltantes para la variable de ",variable_n," en el período ",years), x = "Longitud", y = "Latitud") +
-    ylim(12.9,16) + xlim(-84.7,-89.2)
+    ylim(12.9,16) + xlim(-89.2,-84.7)
   
   tiff(paste(outDir,"map_faltantes_",variable,"_",years,".tif",sep=""), height=2048,width=1500,res=200,
        pointsize=1.5,compression="lzw")

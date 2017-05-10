@@ -94,9 +94,9 @@ outDir ="X:/Water_Planning_System/01_weather_stations/hnd_enee/"
 rutCat = "X:/Water_Planning_System/01_weather_stations/catalog_daily.csv"
 dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
 
-time_period=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days")
+time_period=seq(as.Date("1990/1/1"), as.Date("2016/12/31"), "days")
 
-j=1
+j=2
 organize_data(inDir,outDir,rutCat,variable[j],time_period,inst="ENEE")
 
 
