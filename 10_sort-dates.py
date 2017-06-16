@@ -9,11 +9,12 @@ import os, sys, string, glob
 if len(sys.argv) < 2:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 10_sort-dates.py W:\01_weather_stations\hnd_enee\daily_raw"
+	print "   - ie: python D:\\_Scripts\\usaid_hnd\\10_sort-dates.py X:\\Water_Planning_System\\01_weather_stations\\hnd_enee\\daily_raw\\test"
 	sys.exit(1)
 
 #Set variables 
 dirbase = sys.argv[1]
+
 
 #Clear screen
 os.system('cls')
@@ -23,8 +24,9 @@ print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "     Sort by date ideam daily files		" 
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print "\n"
-
-varlist = "tmax", "tmin"
+print dirbase
+# varlist = "prec", "tmax", "tmin"
+varlist = "prec"
 # varlist = "evap", "rhum", "sbright", "tmax", "tmean", "tmin", "wsmean", "wsmeand", "wsmax", "wtotal"
 # varlist = "evap", "prec", "srad", "sradv", "tmax", "tmin", "wsmean"
 
@@ -39,6 +41,9 @@ varlist = "tmax", "tmin"
 for var in varlist:
 
 	stlist = sorted(glob.glob(dirbase + "\\" + var + "-per-station" + "\\*.txt"))
+	print stlist
+	print var
+	
 	for st in stlist:
 
 		print var, os.path.basename(st)
