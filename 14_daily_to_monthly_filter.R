@@ -32,11 +32,11 @@ sum22=function(a,na.rm=T){
 # precip=read.table("clipboard",header = T)
 # tmax=read.table("clipboard",header = T)
 # tmin=read.table("clipboard",header = T)
-inDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_raw/test/daily_processed/"
-outDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_raw/test/"
+inDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh_noaa/daily_processed/gap_filling/"
+outDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh_noaa"
 
-tmax = read.csv(paste0(inDir,"tmax_daily_qc.csv"),header = T)
-tmin = read.csv(paste0(inDir,"tmin_daily_qc.csv"),header = T)
+tmax = read.csv(paste0(inDir,"data_genTmax.csv"),header = T)
+tmin = read.csv(paste0(inDir,"data_genTmin.csv"),header = T)
 prec = read.csv(paste0(inDir,"prec_daily_qc.csv"),header = T)
 unique(apply(prec,2,class))
 
