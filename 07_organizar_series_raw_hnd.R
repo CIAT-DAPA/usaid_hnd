@@ -16,6 +16,7 @@ organize_data = function(inDir,outDir,rutCat,variable,time_period,inst=NULL){
   nom.files<-substring(files,1,nchar(files)-13)
   
   idstation = read.csv(rutCat,header=T) #Cargar base con código y nombre de la estación
+  names(idstation) = tolower(names(idstation))
   idstation = idstation[which(idstation$variable==variable),]
   if(!is.null(inst)){ 
        idstation = idstation[which(idstation$operator==inst),]
@@ -74,14 +75,14 @@ organize_data = function(inDir,outDir,rutCat,variable,time_period,inst=NULL){
 
 
 ##Run para datos DGRH
-variable = c("prec","tmax","tmin")
+variable = c("tmax","tmin")
 
-inDir = "X:/Water_Planning_System/01_weather_stations/hnd_all/daily_raw/"
-outDir ="X:/Water_Planning_System/01_weather_stations/hnd_all/" 
+inDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_raw/"
+outDir ="X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_raw/" 
 rutCat = "X:/Water_Planning_System/01_weather_stations/catalog_daily.csv"
 dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
 
-time_period=seq(as.Date("1980/1/1"), as.Date("2016/12/31"), "days")
+time_period=seq(as.Date("1980/1/1"), as.Date("2015/12/31"), "days")
 
 
 for(j in 1:length(variable)) organize_data(inDir,outDir,rutCat,variable[j],time_period)
@@ -96,7 +97,7 @@ dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
 
 time_period=seq(as.Date("1990/1/1"), as.Date("2016/12/31"), "days")
 
-j=2
+j=1
 organize_data(inDir,outDir,rutCat,variable[j],time_period,inst="ENEE")
 
 

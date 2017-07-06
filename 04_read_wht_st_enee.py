@@ -10,7 +10,7 @@ from csv import writer as csvwriter, reader as cvsreader
 if len(sys.argv) < 4:
 	os.system('cls')
 	print "\n Too few args"
-	print "   - ie: python 04_read_wht_st_enee.py W:\\01_weather_stations\\hnd_enee\\daily_raw\\_primary_files\\2da_parte W:\\01_weather_stations\\hnd_enee\\daily_raw\\test summary_v2"
+	print "   - ie: python D:\\_Scripts\\usaid_hnd\\04_read_wht_st_enee.py X:\\Water_Planning_System\\01_weather_stations\\hnd_enee\\daily_raw\\_primary_files\\2da_parte X:\\Water_Planning_System\\01_weather_stations\\hnd_enee\\daily_raw\\test summary_v2"
 	sys.exit(1)
 
 #Set variables 
@@ -46,7 +46,7 @@ for stfile in stlist:
 		## Loop around lines
 		for line in file:
 			
-			if not line.find("EMPRESA") > -1 or line.find("Estudio") > -1:
+		if not line.find("EMPRESA") > -1 or line.find("Estudio") > -1:
 				
 				## Read weather info txt plain file
 				if line.find("ESTACION:") > -1:
@@ -71,6 +71,25 @@ for stfile in stlist:
 					year = str(intline.split("\t")[-1][:-1])
 					var = "prec"
 					print stNumber, stName, year, var	
+					
+			## Read weather info txt plain file
+			if line.find("ESTACION:") > -1:
+				stName = line.split("\t")[0].split(": ")[-1]
+				stWaters = line.split("\t")[5].split(": ")[-1]
+				#print stName
+			# if line.find("CODIGO:") > -1:
+				# stNumber = line.split("\t")[5].split(": ")[-1]
+				# lat = str(int(line.split("\t")[9].split(";")[0].split("-")[0]) + int(line.split("\t")[9].split(";")[0].split("-")[1]) / 60 + int(line.split("\t")[9].split(";")[0].split("-")[2][:2]) / 3600)
+				# lon = str(int(line.split("\t")[9].split(";")[1].split("-")[0]) + int(line.split("\t")[9].split(";")[1].split("-")[1]) / 60 + int(line.split("\t")[9].split(";")[1].split("-")[2][:2]) / 3600)
+					
+			# if line.find("ELEVACION:") > -1:
+				# elev = line.split("\t")[9].split(": ")[1].replace("M", "")
+
+			## Define var name
+			if line.find(":19") > -1 or line.find(":20") > -1 or line.find(":21") > -1 or line.find(": 19") > -1 or line.find(": 20") > -1 or line.find(": 21") > -1 or line.find(":	19") > -1 or line.find(":	20") > -1 or line.find(":	21") > -1:
+				year = str(int(line.split(":")[-1][:-1]))
+				var = "prec"
+				print stNumber, stName, year, var	
 				
 				# elif line.find("VALORES MEDIOS  DIARIOS DE TEMPERATURA") > -1:
 					# var = "tmean"
