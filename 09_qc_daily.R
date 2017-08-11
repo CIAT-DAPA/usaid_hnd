@@ -92,8 +92,8 @@ if(variable=="prec"){
     lim_inf.na = c()
     lim_sup.na = c()
     for(j in 1:12){
-      lim_inf.na[month==month.abb[j]]=val.na$stats[1,j]
-      lim_sup.na[month==month.abb[j]]=val.na$stats[5,j]
+      lim_inf.na[month==month.abb.s[j]]=val.na$stats[1,j]
+      lim_sup.na[month==month.abb.s[j]]=val.na$stats[5,j]
 
     }
 

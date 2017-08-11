@@ -1,6 +1,7 @@
 ## Needs java x-64 (if R is 64bits) https://www.java.com/en/download/manual.jsp 
 Sys.setenv(JAVA_HOME='C:/Program Files/Java/jre1.8.0_121')
-
+options(java.parameters = "-Xmx4g" )
+library(XLConnect)
 
 #### Read DGRH weather data ####
 # Note: There are some stations with wrong header. We use the previous 
@@ -27,7 +28,7 @@ readDGRH_n <- function(iDir="", xlsF="", oDir=""){
     # Read table and remove unnecessary columns
     #data <- xlsF_s[as.numeric(xlsF_s[,1]) > 1950,]
     data <- xlsF_s[!is.na(xlsF_s[,1]),]
-    data <- data[-((nrow(data)-3):nrow(data)),]
+    data <- data[-((which(data[,1]==31)+1):nrow(data)),]
     
   
     
@@ -36,7 +37,7 @@ readDGRH_n <- function(iDir="", xlsF="", oDir=""){
     # Read station info
     #irow <- which(sapply(lapply(strsplit(xlsF_s[,1], " "), function(ch) grep("ESTACION", tolower(ch))), function(x) length(x) > 0), arr.ind = TRUE)
     irow <- xlsF_s[1, ]
-    irow <- gsub("ESTACION : |CUENCA : |RIO |AÑO HIDROLOGICO |", "", irow)
+    irow <- gsub("ESTACION :|CUENCA : |RIO |AÑO HIDROLOGICO |", "", irow)
     irow[which(irow == "")] <- NA
     irow <- irow[!is.na(irow)]
     irow <- strsplit(irow, " ")[[1]]
@@ -44,9 +45,9 @@ readDGRH_n <- function(iDir="", xlsF="", oDir=""){
     irow <- irow[!is.na(irow)]
     
     
-    st_name[i] <- tolower(irow[1])
-    st_river <- irow[2]
-    st_year <- irow[3]
+    st_name[i] <- paste(tolower(irow[1:(length(irow)-2)]), collapse = '_')
+    st_river <- irow[length(irow)-1]
+    st_year <- irow[length(irow)]
     
     year.ini = substring(st_year,1,4)
     year.end = substring(st_year,6,10)
@@ -75,10 +76,10 @@ readDGRH_n <- function(iDir="", xlsF="", oDir=""){
       dir.create(oDirVar, recursive = T)
     }
     
-    cat(paste(" - write whtst output file ",st_name[i] ,"\n"))
+    cat(paste(" - write whtst output file ",i,st_name[i] ,"\n"))
     
     if(st_name[i] %in% st_name){
-      write.table(data_end, paste0(oDirVar, "/", st_name[i], "_raw_hdl.txt"), quote = F, row.names = F, append = T)
+      write.table(data_end, paste0(oDirVar, "/", st_name[i], "_raw_hdl.txt"), quote = F, col.names =F, row.names = F, append = T)
   
     }else{
       write.table(data_end, paste0(oDirVar, "/", st_name[i], "_raw_hdl.txt"), quote = F, row.names = F)
