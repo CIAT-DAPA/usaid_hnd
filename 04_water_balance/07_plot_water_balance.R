@@ -1,4 +1,6 @@
-### Plot resulting variables of water balance
+### Plot resulting variables of the water balance
+### Author: Jefferson Valencia Gomez
+### email: j.valencia@cgiar.org, jefferson.valencia.gomez@gmail.com
 
 # Load libraries
 library(raster)
@@ -9,8 +11,8 @@ library(sp)
 
 # Arguments
 iDir <- "Y:/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather"
-varLs <- c("aet", "eprec", "perc", "runoff", "sstor")
-varRs <- c("Evapotranspiración", "Precipitacón Efectiva", "Percolación", "Escorrentía", "Humedad del Suelo")
+varLs <- c("aet", "eprec", "perc", "runoff", "sstor", "bflow")
+varRs <- c("Evapotranspiración", "Precipitacón Efectiva", "Percolación", "Escorrentía", "Humedad del Suelo", "Flujo Base")
 dicVar <- vector(mode="list", length=length(varLs))
 names(dicVar) = varLs
 
@@ -19,7 +21,7 @@ for (i in 1:length(varLs)){
 }
 
 oDir <- "Y:/Outputs/WPS/Balance_Hidrico/maps"
-mask <- "Y:/06_Analysis/Extracts_MicroCuencas/mask/MicroCuencas_ZOI.shp"
+mask <- "Y:/06_analysis/Extracts_MicroCuencas/mask/Microcuencas_ZOI_Finales.shp"
 
 # read microwatersheds
 poly <- shapefile(mask)

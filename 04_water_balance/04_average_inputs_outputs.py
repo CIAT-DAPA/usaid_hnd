@@ -22,11 +22,11 @@ wd = raw_input("Enter the path of the variable to be precessed: ")
 rangeYears = raw_input("Type the interval of years to process (e.g. '1991-2014') or just press Enter to take the "
                        "interval by default: ")
 variable = int(raw_input("Type 0: 'prec', 1: 'tmax', 2: 'tmin', 3: 'tmean', 4: 'eto', 5: 'runoff', 6: 'eprec', "
-                         "7: 'aet', 8: 'perc', 9: 'sstor' "))
+                         "7: 'aet', 8: 'perc', 9: 'sstor', 10: 'bflow' :"))
 
 # Options of variables
 weather_vars = {0: 'prec', 1: 'tmax', 2: 'tmin', 3: 'tmean', 4: 'eto', 5: 'runoff', 6: 'eprec', 7: 'aet', 8: 'perc',
-                9: 'sstor'}
+                9: 'sstor', 10: "bflow"}
 
 # Variable to be processed
 working_var = weather_vars[variable]
@@ -67,6 +67,7 @@ def generate_annual(folder, wv, fr):
     print "************************************************************************"
     print ""
 
+    # Different math operation for temperatures
     if wv[0] == 't':
         operation = "MEAN"
     else:
