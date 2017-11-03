@@ -1,11 +1,24 @@
-### Calculate monthly streamflows of microwatersheds
+### Calculate streamflows of microwatersheds at yearly-monthly timescale
 ### Author: Jefferson Valencia Gomez
 ### email: j.valencia@cgiar.org, jefferson.valencia.gomez@gmail.com
 
-all_vars = read.csv("Y:/06_analysis/Extracts_MicroCuencas/mth_avg_timeline_all_vars.csv")
+runoff = read.csv("Y:/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_runoff.csv")
+bflow = read.csv("Y:/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_bflow.csv")
 str_net = read.csv("Y:/Outputs/WPS/Delimitacion_Cuencas/stream_network_ZOI_WPS_updated.csv")
 oDir = "Y:/06_analysis/Extracts_MicroCuencas"
+yi <- "1991"
+yf <- "2014"
+years = yi:yf
 months = 1:12
+
+wyield = cbind(runoff$HydroID, runoff[-1] + bflow[-1])
+
+yr_mth <- expand.grid(months, years)
+names(wyield) = c("HydroID", paste0("wyield_", yr_mth[,2], "_", months))
+
+cat("writing wyield file....")
+# Final file is written as CSV
+write.csv(wyield, paste0(oDir, "/mth_yearly_timeline_wyield.csv"), row.names = FALSE)
 
 for (i in 1:length(str_net$id)){
 
@@ -20,14 +33,11 @@ for (i in 1:length(str_net$id)){
   # Get upstream catchments
   upstr_cats = strsplit(as.character(str_net$upstream_catchments[i]), "-")[[1]]
   
-  num_columns = length(all_vars[1,])
-
-  if (id %in% all_vars$HydroID){
+  if (id %in% wyield$HydroID){
     # Get row number of the catchment being analyzed
-    match_row = which(all_vars$HydroID == id)
-    
+
     # Get streamflow (m3/s) contributed by the catchment being analyzed
-    monthly_flow_m3s = (all_vars[match_row, (num_columns-12):(num_columns-1)]/1000)*area_m2/(30.42*86400)
+    monthly_flow_m3s = (wyield[-1]/1000)*area_m2/(30.42*86400)
     
     if (upstr_cats[1] == ""){
       all_flows = rep(monthly_flow_m3s, 2)
@@ -36,10 +46,10 @@ for (i in 1:length(str_net$id)){
       cats = as.integer(c(id, upstr_cats))
       
       #Get rows of catchments involved
-      row_cats = all_vars[all_vars$HydroID %in% cats,]
+      row_cats = wyield[wyield$HydroID %in% cats,]
       
       # Average by columns
-      avg_cats = apply(row_cats[,(num_columns-12):(num_columns-1)], 2, mean)
+      avg_cats = apply(row_cats[-1], 2, mean)
       
       # Get streamflow (m3/s) contributed by the whole drainage area including the catchment being analyzed
       monthly_flow_m3s_all = (avg_cats/1000)*total_area_m2/(30.42*86400)
@@ -62,11 +72,10 @@ for (i in 1:length(str_net$id)){
 flow_data = as.data.frame(flow_data)
 
 # Assign the rigth column names
-names(flow_data) = c("HydroID", paste0("caudal_mes_", months), paste0("caudal_total_mes_", months))
+names(flow_data) = c("HydroID", paste0("caudal_", yr_mth[,2], "_", months), paste0("caudal_total_", yr_mth[,2], "_", months))
 
-# Change row names
 row.names(flow_data) = 1:length(flow_data[,1])
 
 cat("writing csv file....")
 # Final file is written as CSV
-write.csv(as.matrix(flow_data), paste0(oDir, "/mth_avg_timeline_sflow.csv"), row.names = FALSE)
+write.csv(as.matrix(flow_data), paste0(oDir, "/mth_yearly_timeline_sflow.csv"), row.names = FALSE)

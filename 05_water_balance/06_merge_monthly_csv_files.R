@@ -23,7 +23,7 @@ for (csv in CSVs){
   else{operation = sum}
   
   # Skip iteration in the case the output file already exists
-  if (var == "vars"){
+  if (var == "vars" || var == "sflow" || var == "wyield"){
     cat("Next iteration\n")
     next
   }
@@ -75,6 +75,10 @@ if (exists("bf") & exists("ro")){
   csv_table = cbind(csv_table, wyield)
   names(csv_table) = c(names(csv_table)[1:num_names], paste0("wyield_mes_", months), names(csv_table)[length(csv_table)])
 }
+
+cat("writing wyield file....")
+# Final file is written as CSV
+write.csv(csv_table[,c(1,(length(csv_table)-12):(length(csv_table)-1))], "mth_avg_timeline_wyield.csv", row.names = FALSE)
 
 # Replaces the word "zone" for "HydroID"
 names(csv_table)[1] = "HydroID"
