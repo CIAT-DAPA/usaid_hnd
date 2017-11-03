@@ -1,4 +1,5 @@
 ### Zonal statistical (mean) by microwatershed of all the variables involved into the water balance
+### Use this script only for input and output variables at montly timescale. Also for yearly-monthly timescale but only for input variables
 ### Author: Jefferson Valencia Gomez
 ### email: j.valencia@cgiar.org, jefferson.valencia.gomez@gmail.com
 ### Contribution: Carlos Navarro <c.e.navarro@cgiar.org>
@@ -24,7 +25,7 @@ varLs <- c("aet", "eprec", "perc", "runoff", "sstor", "bflow")
 # Define if the variables to be analyzed are inputs (in) or outputs (out) of the water balance
 in_or_out = "out"
 # Define if timescale is monthly (m) or yearly-monthly (ym)
-timescale = "ym"
+timescale = "m"
 
 oDir <- paste0(net_drive, "/06_analysis/Extracts_MicroCuencas")
 # Shapefile of microwatersheds 
@@ -53,14 +54,14 @@ progress <- function(n) setTxtProgressBar(pb, n)
 opts <- list(progress=progress)
 
 
-zonalStatistic <- function(var, mask, in_or_out, timescale = "m", iDir, oDir, months = 1:12, years, id = "HydroID", math.operation = "mean"){
+zonalStatistic <- function(var, poly, in_or_out, timescale = "m", iDir, oDir, months = 1:12, years, id = "HydroID", math.operation = "mean"){
   
   cat("\n####################################################\n")
   cat(paste0("Analyzing variable ", var, " ......\n"))
   cat("####################################################\n")
   
   if (in_or_out == "in" ){
-
+    
     if (timescale == "m"){
       # For monthly timescale
       rasters = paste0(iDir, "/", var, "/projected/", var, "_month_", months, ".tif")
@@ -71,7 +72,7 @@ zonalStatistic <- function(var, mask, in_or_out, timescale = "m", iDir, oDir, mo
       yr_mth <- expand.grid(months, years)
       rasters = paste0(iDir, "/", var, "/projected/", yr_mth[,2], "/", var, "_", yr_mth[,2], "_", months, ".tif")
       prefix = "mth_yearly_timeline"
-    } else{ stop("timescale is not an allowed option (m: monthly, ym: yearly-monthly)") }
+    } else{ stop("Timescale is not an allowed option (m: monthly, ym: yearly-monthly)") }
     
     cat("\tCreating raster stack ......\n")
     # Raster stack
@@ -80,7 +81,7 @@ zonalStatistic <- function(var, mask, in_or_out, timescale = "m", iDir, oDir, mo
     cat("\tDissagregating raster stack......\n")
     # Dissagregate for smallest polygons
     rs_stk <- disaggregate(rs_stk, fact=c(4, 4))
-   }
+  }
   else if (in_or_out == "out" ){
     
     if (timescale == "m"){
@@ -88,21 +89,17 @@ zonalStatistic <- function(var, mask, in_or_out, timescale = "m", iDir, oDir, mo
       rasters = paste0(iDir, "/", var, "/",  var, "_month_", months, ".tif")
       prefix = "mth_avg_timeline"
     } else if(timescale == "ym"){
-      # For yearly-monthly timescale 
-      # Get combination of year-month
-      yr_mth <- expand.grid(months, years)
-      rasters = paste0(iDir, "/", var, "/", yr_mth[,2], "/", var, "_", yr_mth[,2], "_", months, ".tif")
-      prefix = "mth_yearly_timeline"
-    } else{ stop("timescale is not an allowed option (m: monthly, ym: yearly-monthly)") }
+      # This script was not created for yearly-monthly timescale execution
+      stop("It is not allowed to execute this script for yearly-monthly timescale of the output variables")
+    } else{ stop("Timescale is not the allowed option (m: monthly)") }
     
     cat("\tCreating raster stack ......\n")
     # Raster stack
     rs_stk <- stack(rasters)
-  } else { stop("variables to be analyzed are neither inputs (in) nor outputs (out)") }
+  } else { stop("Variables to be analyzed are neither inputs (in) nor outputs (out)") }
   
   cat("\tCroping raster stack with mask ......\n")
   # Convert polygons to raster with a specific ID
-  poly <- readOGR(mask) 
   rs_stk_crop <- crop(rs_stk, extent(poly))
   extent(rs_stk_crop) <- extent(poly)
   cat("\tRasterizing microwatersheds ......\n")
@@ -118,11 +115,15 @@ zonalStatistic <- function(var, mask, in_or_out, timescale = "m", iDir, oDir, mo
   
 }
 
-foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow=opts) %dopar% {
+# Read mask and convert it to SpatialPolygonsDataFrame
+poly <- readOGR(mask) 
 
-  zonalStatistic(varLs[i], mask, in_or_out, timescale, iDir, oDir, months, years)
+# Execute process in parallel
+foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow=opts, .verbose=TRUE) %dopar% {
   
-} 
+  zonalStatistic(varLs[i], poly, in_or_out, timescale, iDir, oDir, months, years)
+  
+}
 
 # It is important to stop the cluster, even when the script is stopped abruptly
 stopCluster(cl)
