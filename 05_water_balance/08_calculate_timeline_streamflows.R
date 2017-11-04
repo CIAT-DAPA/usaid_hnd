@@ -35,9 +35,10 @@ for (i in 1:length(str_net$id)){
   
   if (id %in% wyield$HydroID){
     # Get row number of the catchment being analyzed
+    match_row = which(wyield$HydroID == id)
 
     # Get streamflow (m3/s) contributed by the catchment being analyzed
-    monthly_flow_m3s = (wyield[-1]/1000)*area_m2/(30.42*86400)
+    monthly_flow_m3s = (wyield[match_row,-1]/1000)*area_m2/(30.42*86400)
     
     if (upstr_cats[1] == ""){
       all_flows = rep(monthly_flow_m3s, 2)
