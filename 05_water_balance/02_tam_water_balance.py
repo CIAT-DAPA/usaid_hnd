@@ -207,6 +207,7 @@ print "\nDONE!!"
 #  REFERENCES
 #################
 #  Main reference for the water balance: Ulmen, C. (2000). Modelling raster-based monthly water balance components for Europe. Koblenz, Germany: Global Data Runoff Centre (GRDC) and Federal Institute of Hydrology (BfG).
+#  Approach for adjusting CNs for slopes <> 5%: Huang, M., Gallichand, J., Wang, Z., & Goulet, M. (2006). A modification to the Soil Conservation Service curve number method for steep slopes in the Loess Plateau of China. Hydrological Processes, 20(3), 579–589. http://doi.org/10.1002/hyp.5925
 #  Approach for adjusting CNs for slopes <> 5%: Williams, J. R., Kannan, N., Wang, X., Santhi, C., & Arnold, J. G. (2012). Evolution of the SCS Runoff Curve Number Method and Its Application to Continuous Runoff Simulation. Journal of Hydrologic Engineering, 17(11), 1221–1229. http://doi.org/10.1061/(ASCE)HE.1943-5584.0000529
 #  Approach for establishing CNs according to 5-day antecedent rainfall: Srinivasan, M. S., & McDowell, R. W. (2007). Hydrological approaches to the delineation of critical-source areas of runoff. New Zealand Journal of Agricultural Research, 50(2), 249–265. http://doi.org/10.1080/00288230709510293
 #  Approach for the calculation of runoff: Ferguson, B. K. (1996). Estimation of Direct Runoff in the Thornthwaite Water Balance∗. The Professional Geographer, 48(3), 263–271. http://doi.org/10.1111/j.0033-0124.1996.00263.x
