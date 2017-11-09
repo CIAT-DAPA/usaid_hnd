@@ -35,9 +35,9 @@ weather_vars = {'precipitation': 'prec', 'potential_evap': 'eto', 'runoff': 'run
 wettest_month = 9  # User must define the wettest month according to previous analysis
 whc = Float(Raster(os.path.join(tam_in_dir, 'whc60.' + wildcard)))  # Raster of Water Holding Capacity = (FC-WP)*600
 # CNs adjusted for slope (percent_rise) according to Williams et al. (2012)
-cn1 = Float(Raster(os.path.join(tam_in_dir, 'cn1.' + wildcard)))  # Curve Number for Moisture Condition 1
-cn2 = Float(Raster(os.path.join(tam_in_dir, 'cn2.' + wildcard)))  # Curve Number for Moisture Condition 2
-cn3 = Float(Raster(os.path.join(tam_in_dir, 'cn3.' + wildcard)))  # Curve Number for Moisture Condition 3
+cn1 = Float(Raster(os.path.join(tam_in_dir, 'cn1_slp_adj.' + wildcard)))  # Curve Number for Moisture Condition 1
+cn2 = Float(Raster(os.path.join(tam_in_dir, 'cn2_slp_adj.' + wildcard)))  # Curve Number for Moisture Condition 2
+cn3 = Float(Raster(os.path.join(tam_in_dir, 'cn3_slp_adj.' + wildcard)))  # Curve Number for Moisture Condition 3
 kc = Float(Raster(os.path.join(tam_in_dir, 'kc.' + wildcard)))  # Kc values multiplied by 1000
 climate_zones = os.path.join(tam_in_dir, 'climate_zones.' + wildcard)
 ids_clim_zones = [row[0] for row in arcpy.da.SearchCursor(climate_zones, 'Value')]
