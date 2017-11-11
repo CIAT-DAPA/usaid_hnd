@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Script to adjust CNs for slopes different from 5% according to Huang et al.(2006)
 # This adjustment was carried out by using the slope in percentage (folder "CNs_Slope_Adjusted")
-# Before running this routine, it was calculated the CN2 (raw) by executing the tool "Pick" of ArcGI using the
+# Before running this routine, it was calculated the CN2 (raw) by executing the tool "Pick" of ArcGIS using the
 # Hydrological Soil Groups (HSG, folder "HSG-CN2_Raw") and the CN2s associated to Land Use/Land Cover (folder "CN2_A-D")
 # In order to determine the HSG, it was executed the Module Soil Texture Classification in SAGA GIS (http://www.saga-gis.org/saga_tool_doc/2.2.1/grid_analysis_14.html)
 # which derives soil texture classes with USDA scheme from sand, silt and clay contents. Having the texture classes (folder "Soil_Texture"),
