@@ -28,7 +28,7 @@ wildcard = "tif"  # Extension of all sets of rasters to be used by the model
 prefix_ante_table = '5_last_days_month_'
 
 # Initial variables
-years = range(1990, 2014 + 1)  # Years with available weather information to run the water balance
+years = range(1999, 2014 + 1)  # Years with available weather information to run the water balance
 months = range(1, 12 + 1)
 weather_vars = {'precipitation': 'prec', 'potential_evap': 'eto', 'runoff': 'runoff', 'effective_prec': 'eprec',
                 'actual_evap': 'aet', 'percolation': 'perc', 'soil_storage': 'sstor', 'base_flow': 'bflow'}
@@ -85,7 +85,8 @@ sstor_ant = 0.9*whc
 # Base flow of the previous month (mm)
 bflow_ant = 10
 # Recession constant
-k = 0.5
+# k = 0.5
+k = Float(Raster(os.path.join(tam_in_dir, 'k_recession.' + wildcard)))
 
 # Main loop to execute both models
 for year in years_execution:
