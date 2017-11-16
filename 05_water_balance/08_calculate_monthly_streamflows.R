@@ -2,9 +2,12 @@
 ### Author: Jefferson Valencia Gomez
 ### email: j.valencia@cgiar.org, jefferson.valencia.gomez@gmail.com
 
-all_vars = read.csv("Y:/06_analysis/Extracts_MicroCuencas/mth_avg_timeline_all_vars.csv")
-str_net = read.csv("Y:/Outputs/WPS/Delimitacion_Cuencas/stream_network_ZOI_WPS_updated.csv")
-oDir = "Y:/06_analysis/Extracts_MicroCuencas"
+# Network drive
+net_drive = "Y:"
+
+all_vars = read.csv(paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mth_avg_timeline_all_vars.csv"))
+str_net = read.csv(paste0(net_drive, "/Outputs/WPS/Delimitacion_Cuencas/stream_network_ZOI_WPS_updated.csv"))
+oDir = paste0(net_drive, "/06_analysis/Extracts_MicroCuencas")
 months = 1:12
 
 for (i in 1:length(str_net$id)){
@@ -15,7 +18,8 @@ for (i in 1:length(str_net$id)){
   
   # Get areas in m2
   area_m2 = str_net$area_ha_cat[i]*10000
-  total_area_m2 = area_m2 + (str_net$area_ha_upstr_cats[i])*10000
+  # total_area_m2 = area_m2 + (str_net$area_ha_upstr_cats[i])*10000
+  upstr_area_m2 = (str_net$area_ha_upstr_cats[i])*10000
 
   # Get upstream catchments
   upstr_cats = strsplit(as.character(str_net$upstream_catchments[i]), "-")[[1]]
@@ -33,16 +37,18 @@ for (i in 1:length(str_net$id)){
       all_flows = rep(monthly_flow_m3s, 2)
     }
     else{
-      cats = as.integer(c(id, upstr_cats))
+      # cats = as.integer(c(id, upstr_cats))
+      cats = as.integer(upstr_cats)
       
-      #Get rows of catchments involved
+      # Get rows of catchments involved
       row_cats = all_vars[all_vars$HydroID %in% cats,]
       
       # Average by columns
       avg_cats = apply(row_cats[,(num_columns-12):(num_columns-1)], 2, mean)
       
       # Get streamflow (m3/s) contributed by the whole drainage area including the catchment being analyzed
-      monthly_flow_m3s_all = (avg_cats/1000)*total_area_m2/(30.42*86400)
+      # monthly_flow_m3s_all = (avg_cats/1000)*total_area_m2/(30.42*86400)
+      monthly_flow_m3s_all = (avg_cats/1000)*upstr_area_m2/(30.42*86400)
       
       # Merge both calculations
       all_flows = c(monthly_flow_m3s, monthly_flow_m3s_all)
@@ -62,7 +68,8 @@ for (i in 1:length(str_net$id)){
 flow_data = as.data.frame(flow_data)
 
 # Assign the rigth column names
-names(flow_data) = c("HydroID", paste0("caudal_mes_", months), paste0("caudal_total_mes_", months))
+# names(flow_data) = c("HydroID", paste0("caudal_mes_", months), paste0("caudal_total_mes_", months))
+names(flow_data) = c("HydroID", paste0("caudal_mes_", months), paste0("caudal_agar_mes_", months))
 
 # Change row names
 row.names(flow_data) = 1:length(flow_data[,1])

@@ -23,7 +23,8 @@ for (csv in CSVs){
   else{operation = sum}
   
   # Skip iteration in the case the output file already exists
-  if (var == "vars" || var == "sflow" || var == "wyield"){
+  # if (var == "vars" || var == "sflow" || var == "wyield"){
+  if (var == "vars" || var == "sflow"){
     cat("Next iteration\n")
     next
   }
@@ -34,51 +35,49 @@ for (csv in CSVs){
   if (count == 1){
     csv_table = read.csv(csv)
     
-    if (var == "bflow"){bf = csv_table[,-1]}
-    if (var == "runoff"){ro = csv_table[,-1]}
+    # if (var == "bflow"){bf = csv_table[,-1]}
+    # if (var == "runoff"){ro = csv_table[,-1]}
     
     csv_table = cbind(csv_table, apply(csv_table[,-1], 1, operation))
-    # Calculates the annual average or sum
-    names(csv_table) = c(names(csv_table)[1:length(csv_table)-1], paste0(var, "_anual"))
   }
   else{
     file_csv = read.csv(csv)[,-1]
     
-    if (var == "bflow"){bf = file_csv}
-    if (var == "runoff"){ro = file_csv}
+    # if (var == "bflow"){bf = file_csv}
+    # if (var == "runoff"){ro = file_csv}
     
     file_csv = cbind(file_csv, apply(file_csv, 1, operation))
     csv_table = cbind(csv_table, file_csv)
-    # Calculates the annual average or sum
-    names(csv_table) = c(names(csv_table)[1:length(csv_table)-1], paste0(var, "_anual"))
   }
+  # Calculates the annual average or sum
+  names(csv_table) = c(names(csv_table)[1:length(csv_table)-1], paste0(var, "_anual"))
   
   count = count + 1
 }
 
 
-cat("wyield\n")
-# Calculates wyield based on bflow and runoff
-if (exists("bf") & exists("ro")){
-  for (i in months){
-    sum_data = c(bf[,i] + ro[,i])
-    if (i == 1){
-      wyield = sum_data
-    }
-    else{
-      wyield = cbind(wyield, sum_data)
-    }
-  }
-  wyield_anual = apply(wyield, 1, sum)
-  wyield = cbind(wyield, wyield_anual)
-  num_names = length(csv_table)
-  csv_table = cbind(csv_table, wyield)
-  names(csv_table) = c(names(csv_table)[1:num_names], paste0("wyield_mes_", months), names(csv_table)[length(csv_table)])
-}
-
-cat("writing wyield file....")
-# Final file is written as CSV
-write.csv(csv_table[,c(1,(length(csv_table)-12):(length(csv_table)-1))], "mth_avg_timeline_wyield.csv", row.names = FALSE)
+# cat("wyield\n")
+# # Calculates wyield based on bflow and runoff
+# if (exists("bf") & exists("ro")){
+#  for (i in months){
+#    sum_data = c(bf[,i] + ro[,i])
+#    if (i == 1){
+#      wyield = sum_data
+#     }
+#     else{
+#       wyield = cbind(wyield, sum_data)
+#     }
+#   }
+#   wyield_anual = apply(wyield, 1, sum)
+#   wyield = cbind(wyield, wyield_anual)
+#   num_names = length(csv_table)
+#   csv_table = cbind(csv_table, wyield)
+#   names(csv_table) = c(names(csv_table)[1:num_names], paste0("wyield_mes_", months), names(csv_table)[length(csv_table)])
+# }
+# 
+# cat("writing wyield file....")
+# # Final file is written as CSV
+# write.csv(csv_table[,c(1,(length(csv_table)-12):(length(csv_table)-1))], "mth_avg_timeline_wyield.csv", row.names = FALSE)
 
 # Replaces the word "zone" for "HydroID"
 names(csv_table)[1] = "HydroID"

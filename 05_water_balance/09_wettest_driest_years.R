@@ -2,16 +2,19 @@
 ### Author: Jefferson Valencia Gomez
 ### email: j.valencia@cgiar.org, jefferson.valencia.gomez@gmail.com
 
-# Yearly-montly variables
-prec = read.csv("Y:/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_prec.csv")
-sflow = read.csv("Y:/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_sflow.csv")
-oDir = "Y:/06_analysis/Extracts_MicroCuencas"
+# Network drive
+net_drive = "Y:"
 
-yi <- "1991"
+# Yearly-montly variables
+prec = read.csv(paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_prec.csv"))
+sflow = read.csv(paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_sflow.csv"))
+oDir = paste0(net_drive, "/06_analysis/Extracts_MicroCuencas")
+
+yi <- "2000"
 yf <- "2014"
 years = yi:yf
 months = 1:12
-new_columns =  c("HydroID", "Ano", paste0("caudal_", months), paste0("caudal_total_", months))
+new_columns =  c("HydroID", "Ano", paste0("caudal_", months), paste0("caudal_agar_", months))
 prec_newcols =  c("HydroID", "Ano", paste0("prec_", months))
 
 # Create annual prec by row (microwatershed)

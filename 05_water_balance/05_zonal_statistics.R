@@ -21,7 +21,7 @@ net_drive = "Y:"
 #varLs <- c("prec", "tmax", "tmean", "tmin", "eto")
 # Output variables of water balance
 iDir <- paste0(net_drive,"/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather")
-varLs <- c("aet", "eprec", "perc", "runoff", "sstor", "bflow")  
+varLs <- c("aet", "eprec", "perc", "runoff", "sstor", "bflow", "wyield")  
 # Define if the variables to be analyzed are inputs (in) or outputs (out) of the water balance
 in_or_out = "out"
 # Define if timescale is monthly (m) or yearly-monthly (ym)
@@ -31,7 +31,7 @@ oDir <- paste0(net_drive, "/06_analysis/Extracts_MicroCuencas")
 # Shapefile of microwatersheds 
 mask <- paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mask/MicroCuencas_ZOI_Finales.shp")
 # Years of simulation without warm-up year of the water balance
-yi <- "1991"
+yi <- "2000"
 yf <- "2014"
 years = yi:yf
 

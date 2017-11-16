@@ -16,7 +16,7 @@ net_drive = "Y:"
 
 # Output variables of water balance
 iDir <- paste0(net_drive,"/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather")
-# Possible options: "aet", "eprec", "perc", "runoff", "sstor", "bflow"
+# Possible options: "aet", "eprec", "perc", "runoff", "sstor", "bflow", "wyield"
 var = "bflow"
 
 # Prefix of the output CSV file
@@ -26,7 +26,7 @@ oDir <- paste0(net_drive, "/06_analysis/Extracts_MicroCuencas")
 # Shapefile of microwatersheds 
 mask <- paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mask/MicroCuencas_ZOI_Finales.shp")
 # Years of simulation without warm-up year of the water balance
-yi <- "1991"
+yi <- "2000"
 yf <- "2014"
 years = yi:yf
 

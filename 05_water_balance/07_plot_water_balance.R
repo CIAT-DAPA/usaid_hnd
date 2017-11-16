@@ -9,10 +9,13 @@ library(RColorBrewer)
 library(rasterVis)
 library(sp)
 
+# Network drive
+net_drive = "Y:"
+
 # Arguments
-iDir <- "Y:/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather"
-varLs <- c("aet", "eprec", "perc", "runoff", "sstor", "bflow")
-varRs <- c("Evapotranspiración", "Precipitacón Efectiva", "Percolación", "Escorrentía", "Humedad del Suelo", "Flujo Base")
+iDir <- paste0(net_drive, "/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather")
+varLs <- c("aet", "eprec", "perc", "runoff", "sstor", "bflow", "wyield")
+varRs <- c("Evapotranspiración Real", "Precipitacón Efectiva", "Percolación", "Escorrentía Superficial", "Humedad del Suelo", "Flujo Base", "Aporte de Agua")
 dicVar <- vector(mode="list", length=length(varLs))
 names(dicVar) = varLs
 
@@ -20,8 +23,8 @@ for (i in 1:length(varLs)){
   dicVar[[i]] <- varRs[i]
 }
 
-oDir <- "Y:/Outputs/WPS/Balance_Hidrico/maps"
-mask <- "Y:/06_analysis/Extracts_MicroCuencas/mask/Microcuencas_ZOI_Finales.shp"
+oDir <- paste0(net_drive, "/Outputs/WPS/Balance_Hidrico/maps")
+mask <- paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mask/Microcuencas_ZOI_Finales.shp")
 
 # read microwatersheds
 poly <- shapefile(mask)
@@ -44,7 +47,7 @@ for (var in varLs){
   #plot(rs_stk_crop)
   
   # plot title
-  plot.title = paste0(dicVar[var], " (mm)\n1991-2014")
+  plot.title = paste0(dicVar[var], " (mm)\n2000-2014")
   
   # Guardar plot como Tiff. Cambiar el nombre de la imagen
   image = file.path(oDir, paste0(var, "_monthly.tiff"))

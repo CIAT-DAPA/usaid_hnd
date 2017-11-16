@@ -19,14 +19,14 @@ os.system('cls')
 
 # Input parameters
 wd = raw_input("Enter the path of the variable to be precessed: ")
-rangeYears = raw_input("Type the interval of years to process (e.g. '1991-2014') or just press Enter to take the "
+rangeYears = raw_input("Type the interval of years to process (e.g. '2000-2014') or just press Enter to take the "
                        "interval by default: ")
 variable = int(raw_input("Type 0: 'prec', 1: 'tmax', 2: 'tmin', 3: 'tmean', 4: 'eto', 5: 'runoff', 6: 'eprec', "
-                         "7: 'aet', 8: 'perc', 9: 'sstor', 10: 'bflow' :"))
+                         "7: 'aet', 8: 'perc', 9: 'sstor', 10: 'bflow', 11: 'wyield' :"))
 
 # Options of variables
 weather_vars = {0: 'prec', 1: 'tmax', 2: 'tmin', 3: 'tmean', 4: 'eto', 5: 'runoff', 6: 'eprec', 7: 'aet', 8: 'perc',
-                9: 'sstor', 10: "bflow"}
+                9: 'sstor', 10: "bflow", 11: 'wyield'}
 
 # Variable to be processed
 working_var = weather_vars[variable]
@@ -34,7 +34,7 @@ working_var = weather_vars[variable]
 if rangeYears == "":
     # If blank, it is set the default interval
     # Statistics start one year later because of warm-up year
-    finalRange = range(1990 + 1, 2014 + 1)
+    finalRange = range(1999 + 1, 2014 + 1)
 else:
     splitRange = rangeYears.split("-")
     finalRange = range(int(splitRange[0]), int(splitRange[1]) + 1)

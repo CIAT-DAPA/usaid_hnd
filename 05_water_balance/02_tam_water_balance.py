@@ -31,7 +31,8 @@ prefix_ante_table = '5_last_days_month_'
 years = range(1999, 2014 + 1)  # Years with available weather information to run the water balance
 months = range(1, 12 + 1)
 weather_vars = {'precipitation': 'prec', 'potential_evap': 'eto', 'runoff': 'runoff', 'effective_prec': 'eprec',
-                'actual_evap': 'aet', 'percolation': 'perc', 'soil_storage': 'sstor', 'base_flow': 'bflow'}
+                'actual_evap': 'aet', 'percolation': 'perc', 'soil_storage': 'sstor', 'base_flow': 'bflow',
+                'water_yield': 'wyield'}
 wettest_month = 9  # User must define the wettest month according to previous analysis
 whc = Float(Raster(os.path.join(tam_in_dir, 'whc60.' + wildcard)))  # Raster of Water Holding Capacity = (FC-WP)*600
 # CNs adjusted for slope (percent_rise) according to Williams et al. (2012)
@@ -111,8 +112,9 @@ for year in years_execution:
     aet_dir = os.path.join(tam_wdir, weather_vars['actual_evap'])
     perc_dir = os.path.join(tam_wdir, weather_vars['percolation'])
     bflow_dir = os.path.join(tam_wdir, weather_vars['base_flow'])
+    wyield_dir = os.path.join(tam_wdir, weather_vars['water_yield'])
 
-    folders_exist([tam_wdir, runoff_dir, eprec_dir, sstor_dir, aet_dir, perc_dir, bflow_dir])
+    folders_exist([tam_wdir, runoff_dir, eprec_dir, sstor_dir, aet_dir, perc_dir, bflow_dir, wyield_dir])
 
     # Loop for running tam model monthly
     for month in months_execution:
@@ -190,11 +192,17 @@ for year in years_execution:
         perc = Con(eprec > eto, Con(sstor_ant + (eprec - eto) > whc, sstor_ant + (eprec - eto) - whc, 0), 0)
         perc.save(perc_file)
 
-        print "\tCalculating base flow......\n"
+        print "\tCalculating base flow......"
         bflow_file = os.path.join(bflow_dir,
                                   weather_vars['base_flow'] + '_' + str(year) + '_' + str(month) + '.' + wildcard)
         bflow = (k * bflow_ant) + ((1 - k) * perc)
         bflow.save(bflow_file)
+
+        print "\tCalculating water yield......\n"
+        wyield_file = os.path.join(wyield_dir,
+                                   weather_vars['water_yield'] + '_' + str(year) + '_' + str(month) + '.' + wildcard)
+        wyield = runoff + bflow
+        wyield.save(wyield_file)
 
         # For other months sstor_ant is Si-1
         sstor_ant = sstor
