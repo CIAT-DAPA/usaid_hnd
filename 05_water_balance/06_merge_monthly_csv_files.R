@@ -38,6 +38,7 @@ for (csv in CSVs){
     # if (var == "bflow"){bf = csv_table[,-1]}
     # if (var == "runoff"){ro = csv_table[,-1]}
     
+    # Calculates the annual average or sum
     csv_table = cbind(csv_table, apply(csv_table[,-1], 1, operation))
   }
   else{
@@ -46,10 +47,10 @@ for (csv in CSVs){
     # if (var == "bflow"){bf = file_csv}
     # if (var == "runoff"){ro = file_csv}
     
+    # Calculates the annual average or sum
     file_csv = cbind(file_csv, apply(file_csv, 1, operation))
     csv_table = cbind(csv_table, file_csv)
   }
-  # Calculates the annual average or sum
   names(csv_table) = c(names(csv_table)[1:length(csv_table)-1], paste0(var, "_anual"))
   
   count = count + 1
