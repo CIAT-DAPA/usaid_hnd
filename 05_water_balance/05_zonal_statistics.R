@@ -39,7 +39,7 @@ months = 1:12
 
 # Temporal folder for raster calculations
 if (!file.exists(paste0(oDir, "/tmp"))) {dir.create(paste0(oDir, "/tmp"), recursive = TRUE)}
-rasterOptions(tmpdir= paste0(oDir, "/tmp"))
+rasterOptions(tmpdir = paste0(oDir, "/tmp"))
 
 # Configuration of parallelization
 #nCores <- detectCores(all.tests = FALSE, logical = TRUE)
@@ -103,7 +103,7 @@ zonalStatistic <- function(var, poly, in_or_out, timescale = "m", iDir, oDir, mo
   rs_stk_crop <- crop(rs_stk, extent(poly))
   extent(rs_stk_crop) <- extent(poly)
   cat("\tRasterizing microwatersheds ......\n")
-  poly_rs <- rasterize(poly, rs_stk_crop[[1]], id)
+  poly_rs <- rasterize(poly, rs_stk_crop[[1]], as.integer(levels(poly@data[id][[1]])))
   
   cat("\tCarrying out the zonal statistic operation ......\n")
   # Get the zonal statistics
@@ -128,4 +128,8 @@ foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow=opts, 
 # It is important to stop the cluster, even when the script is stopped abruptly
 stopCluster(cl)
 close(pb)
+
+# Delete temp files
+unlink(rasterOptions()$tmpdir, recursive=TRUE)
+
 cat("\nDone!!!")

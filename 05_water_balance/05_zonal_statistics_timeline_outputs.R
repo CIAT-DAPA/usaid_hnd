@@ -67,7 +67,7 @@ zonalStatistic <- function(var, year, poly, iDir, months = 1:12, id = "HydroID",
   rs_stk_crop <- crop(rs_stk, extent(poly))
   extent(rs_stk_crop) <- extent(poly)
   cat("\tRasterizing microwatersheds ......\n")
-  poly_rs <- rasterize(poly, rs_stk_crop[[1]], id)
+  poly_rs <- rasterize(poly, rs_stk_crop[[1]], as.integer(levels(poly@data[id][[1]])))
   
   cat("\tCarrying out the zonal statistic operation ......\n")
   # Get the zonal statistics
@@ -100,5 +100,8 @@ colnames(final_data)[1] = "HydroID"
 cat("\tWriting the CSV file ......\n")
 # Write the outputs
 write.csv(final_data, paste0(oDir, "/", prefix, "_", var, ".csv"), row.names=F)
+
+# Delete temp files
+unlink(rasterOptions()$tmpdir, recursive=TRUE)
 
 cat("\nDone!!!")
