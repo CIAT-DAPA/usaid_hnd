@@ -87,10 +87,6 @@ data = foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow
   
 } 
 
-# It is important to stop the cluster, even when the script is stopped abruptly
-stopCluster(cl)
-close(pb)
-
 # Remove repeated columns
 final_data = data[,-which(colnames(data) == "zone")[-1]]
 
@@ -100,6 +96,10 @@ colnames(final_data)[1] = "HydroID"
 cat("\tWriting the CSV file ......\n")
 # Write the outputs
 write.csv(final_data, paste0(oDir, "/", prefix, "_", var, ".csv"), row.names=F)
+
+# It is important to stop the cluster, even when the script is stopped abruptly
+stopCluster(cl)
+close(pb)
 
 # Delete temp files
 unlink(rasterOptions()$tmpdir, recursive=TRUE)
