@@ -21,7 +21,7 @@ del prow
 del polyrows
 
 # Fields to be used into the main functions
-fields = ['HydroID', 'NextDownID', "SHAPE@"]
+fields = ['HydroID', 'NextDownID', 'SHAPE@']
 # Change the value below depending on the minimum catchment area to preserve. Default 100 ha = 1000000 m2
 where1 = '"' + 'Shape_Area' + '" < 1000000'
 
