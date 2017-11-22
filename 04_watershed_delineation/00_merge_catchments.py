@@ -17,6 +17,7 @@ final_layer =  arcpy.env.scratchGDB + "/Catchment10000"
 inpgs = arcpy.CopyFeatures_management(polygons, final_layer)
 
 # Read polygon geometry into dictionary; key = HydroID, value = geometry
+print "Creating initial dictionary. This process can take long time if the input layer contains many polygons!"
 geometryDictionary = {}
 polyrows = arcpy.SearchCursor(inpgs)
 for prow in polyrows:

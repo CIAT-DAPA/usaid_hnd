@@ -20,6 +20,7 @@ final_layer =  arcpy.env.scratchGDB + "/Microcuencas_ZOI_Usos_Dissolve"
 polygons = arcpy.CopyFeatures_management(inpgs, final_layer)
 
 # Read polygon geometry into dictionary; key = OBJECTID, value = geometry
+print "Creating initial dictionaries. This process can take long time if the input layer contains many polygons!"
 geometryDictionary = {}
 hydroidDictionary = {}
 polyrows = arcpy.SearchCursor(polygons)
