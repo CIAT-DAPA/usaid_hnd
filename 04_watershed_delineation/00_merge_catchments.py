@@ -9,8 +9,12 @@ from arcpy.sa import *
 arcpy.CheckOutExtension("spatial")
 arcpy.env.overwriteOutput = True
 
-# inpgs = Catchment polygons feature class stored on a database, no shapefile allowed
-inpgs = r"D:\ToBackup\Documents\ArcGIS\scratch.gdb\Catchment10000"
+# polygons = Catchment polygons feature class stored on a database, no shapefile allowed
+polygons = r"D:\ToBackup\Documents\ArcGIS\scratch.gdb\Catchment10000"
+
+# Create a copy of the input layer
+final_layer =  arcpy.env.scratchGDB + "/Catchment10000"
+inpgs = arcpy.CopyFeatures_management(polygons, final_layer)
 
 # Read polygon geometry into dictionary; key = HydroID, value = geometry
 geometryDictionary = {}
@@ -47,7 +51,7 @@ while should_restart:
 				geometry1 = prow1[2]
 				geometry2 = geometryDictionary[grd2]
 				
-				print "Merging the geometries of the current catchment (HydroID: " + str(grd1) + ") and its downstream catchment (HydroID: " + str(grd2) + ")"
+				print "\tMerging the geometries of the current catchment (HydroID: " + str(grd1) + ") and its downstream catchment (HydroID: " + str(grd2) + ")"
 				# Merged geometries
 				geometries = geometry1.union(geometry2)
 				
@@ -56,9 +60,9 @@ while should_restart:
 				
 				# Change the NextDownID of the upstream catchments of the current one in order to drain to the catchment with HydroID = grd2
 				polyrows1 = arcpy.UpdateCursor(inpgs, where2)	
-				print "Changing the NextDownID values of the upstream catchments to be the HydroID (" + str(grd2) + ") of the downstream catchment"				
+				print "\tChanging the NextDownID values of the upstream catchments to be the HydroID (" + str(grd2) + ") of the downstream catchment"				
 				for ucat in polyrows1:
-					print "\tChanging the NextDownID (" + str(ucat.getValue(fields[1])) + ") value of the upstream catchment (HydroID: " + str(ucat.getValue(fields[0])) + ") by " + str(grd2)
+					print "\t\tChanging the NextDownID (" + str(ucat.getValue(fields[1])) + ") value of the upstream catchment (HydroID: " + str(ucat.getValue(fields[0])) + ") by " + str(grd2)
 					ucat.setValue(fields[1], grd2)
 					polyrows1.updateRow(ucat)
 				del ucat
@@ -70,7 +74,7 @@ while should_restart:
 				# Delete the polygon and row of the current catchment
 				polyrows2 = arcpy.UpdateCursor(inpgs, where3)
 				for ccat in polyrows2:
-					print "Deleting the current catchment with HydroID: " + str(grd1)
+					print "\tDeleting the current catchment with HydroID: " + str(grd1)
 					polyrows2.deleteRow(ccat)
 				del ccat
 				del polyrows2
@@ -80,8 +84,8 @@ while should_restart:
 				
 				# Change the geometry of the polygon of the downstream catchment
 				polyrows3 = arcpy.UpdateCursor(inpgs, where4)
-				print "Replacing the geometry of the downstream catchment (HydroID: " + str(grd2) + ") with the merged geometries"			
 				for dcat in polyrows3:
+					print "\tReplacing the geometry of the downstream catchment (HydroID: " + str(grd2) + ") with the merged geometries\n"			
 					dcat.Shape = geometries
 					polyrows3.updateRow(dcat)					
 					# Important to update the dictionary with the new geometry
@@ -96,6 +100,9 @@ while should_restart:
 				# Restart the for loop and create again the SearchCursor as some rows were updated
 				should_restart = True
 				break
+
+print "###The resulting layer is saved in " + final_layer + "###"
+print "DONE!!"
 
 # Do not forget to then run the ArcGIS tool "Spatial Join" with the following configuration:
 # - Target Features: DrainageLine

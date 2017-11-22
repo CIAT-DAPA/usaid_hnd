@@ -16,14 +16,15 @@ arcpy.env.overwriteOutput = True
 inpgs = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\Outputs\WPS\WPS_datasets.gdb\Microcuencas_ZOI_Usos_Dissolve"
 
 # Create a copy of the input layer
-polygons = arcpy.CopyFeatures_management(inpgs, arcpy.env.scratchGDB + "/Microcuencas_ZOI_Usos_Dissolve")
+final_layer =  arcpy.env.scratchGDB + "/Microcuencas_ZOI_Usos_Dissolve"
+polygons = arcpy.CopyFeatures_management(inpgs, final_layer)
 
 # Read polygon geometry into dictionary; key = OBJECTID, value = geometry
 geometryDictionary = {}
 hydroidDictionary = {}
 polyrows = arcpy.SearchCursor(polygons)
 for prow in polyrows:
-    geometryDictionary[prow.OBJECTID] = prow.Shape
+	geometryDictionary[prow.OBJECTID] = prow.Shape
 	hydroidDictionary[prow.OBJECTID] = prow.HydroID
 del prow
 del polyrows
@@ -50,54 +51,59 @@ while should_restart:
 			print "######################################################"
 			
 			# Get the neighboring polygons of the analyzed one with the same HydroID (same microwatershed)
-			areaDictionary = {}
+			# areaDictionary = {}
+			borderDictionary = {}
 			for key, value in geometryDictionary.iteritems():
 				if geometry.touches(value) and hydroidDictionary[key] == hydroid:
-					areaDictionary[key] = value.area
-			
-			# Get the OBJECTID of the neighboring polygon with the biggest area
-			neighPoly = max(areaDictionary.iteritems(), key=operator.itemgetter(1))[0]
-			print "\tThe neighboring polygon with the biggest area is : " + str(neighPoly)
-			
-			# Union of both geometries		
-			geometries = geometry.union(geometryDictionary[neighPoly])
-				
-			# Query to get the current polygon 
-			where2 = '"' + fields[0] + '" = ' + str(oid)
-			
-			# Delete the polygon and row
-			polyrows2 = arcpy.UpdateCursor(polygons, where2)
-			for poly in polyrows2:
-				print "Deleting the current polygon with OBJECTID: " + str(oid)
-				polyrows2.deleteRow(poly)
-			del poly
-			del polyrows2
-			
-			# Query to get the neighboring polygon
-			where3 = '"' + fields[0] + '" = ' + str(neighPoly)
-			
-			# Change the geometry of the neighboring polygon
-			polyrows3 = arcpy.UpdateCursor(polygons, where3)
-			print "Replacing the geometry of the neighboring polygon (OBJECTID: " + str(neighPoly) + ") with the merged geometries"			
-			for poly2 in polyrows3:
-				poly2.Shape = geometries
-				polyrows3.updateRow(poly2)					
-				# Important to update the dictionary with the new geometry
-				geometryDictionary[neighPoly] = geometries					
-			del poly2
-			del polyrows3
-			
-			del geometry
-			del geometries
-	
-			# Restart the for loop and create again the SearchCursor as some rows were updated
-			should_restart = True
-			break
+					# areaDictionary[key] = value.area
+					# Get the coincident edge between neighboring polygons as a polyline and then store its length
+					border = geometry.intersect(value, 2)
+					borderDictionary[key] = border.length
 
-# Do not forget to then run the ArcGIS tool "Spatial Join" with the following configuration:
-# - Target Features: DrainageLine
-# - Join Features: Catchment (the resulting feature layer of this script)
-# - Join Operation (optional): JOIN_ONE_TO_ONE
-# - Keep All Target Features (optional): Checked
-# - Field Map of Join Features (optional): Keep all the fields of the "Target Features" and only the "HydroID" field of the "Join Features". Remember to rename the last field as "DrainID2"
-# - Match Option (optional): HAVE_THEIR_CENTER_IN
+			if len(borderDictionary) > 0:
+			
+				# Get the OBJECTID of the neighboring polygon with the longest coincident edge
+				# neighPoly = max(areaDictionary.iteritems(), key=operator.itemgetter(1))[0]
+				neighPoly = max(borderDictionary.iteritems(), key=operator.itemgetter(1))[0]
+				print "\tThe neighboring polygon with the longest coincident edge is : " + str(neighPoly)
+				
+				# Union of both geometries
+				print "\tMerging both geometries......"			
+				geometries = geometry.union(geometryDictionary[neighPoly])
+					
+				# Query to get the current polygon 
+				where2 = '"' + fields[0] + '" = ' + str(oid)
+				
+				# Delete the polygon and row
+				polyrows2 = arcpy.UpdateCursor(polygons, where2)
+				for poly in polyrows2:
+					print "\tDeleting the current polygon with OBJECTID: " + str(oid)
+					polyrows2.deleteRow(poly)
+				del poly
+				del polyrows2
+				
+				# Query to get the neighboring polygon
+				where3 = '"' + fields[0] + '" = ' + str(neighPoly)
+				
+				# Change the geometry of the neighboring polygon
+				polyrows3 = arcpy.UpdateCursor(polygons, where3)
+				print "\tReplacing the geometry of the neighboring polygon (OBJECTID: " + str(neighPoly) + ") with the merged geometries\n"			
+				for poly2 in polyrows3:
+					poly2.Shape = geometries
+					polyrows3.updateRow(poly2)					
+					# Important to update the dictionary with the new geometry
+					geometryDictionary[neighPoly] = geometries					
+				del poly2
+				del polyrows3
+				
+				del borderDictionary
+				del border
+				del geometry
+				del geometries
+		
+				# Restart the for loop and create again the SearchCursor as some rows were updated
+				should_restart = True
+				break
+
+print "###The resulting layer is saved in " + final_layer + "###"
+print "DONE!!"
