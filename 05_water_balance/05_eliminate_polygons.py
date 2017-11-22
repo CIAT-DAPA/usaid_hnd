@@ -8,17 +8,28 @@ import arcpy
 from arcpy import env
 from arcpy.sa import *
 import operator
+import os
+
+# Clean terminal
+os.system('cls')
 
 arcpy.CheckOutExtension("spatial")
 arcpy.env.overwriteOutput = True
 
-# inpgs = no shapefile allowed
-inpgs = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\Outputs\WPS\WPS_datasets.gdb\Microcuencas_ZOI_Usos_Dissolve"
+# File Geodatabase
+ws = raw_input("Enter workspace (*.gdb): ")
+
+# Polygon feature class stored on a database, no shapefile allowed
+layer = raw_input("Enter layer name (no shapefile allowed): ")
+
+# Output name
+out_name = raw_input("Enter name of the output layer: ")
 
 # Create a copy of the input layer
-print "Copying layer to a different location"
-final_layer =  arcpy.env.workspace + "\\Microcuencas_ZOI_Usos_Finales"
-polygons = arcpy.CopyFeatures_management(inpgs, final_layer)
+print "Copying layer"
+in_layer =  os.path.join(ws, layer)
+out_layer = os.path.join(ws, out_name)
+polygons = arcpy.CopyFeatures_management(in_layer, out_layer)
 
 # Read polygon geometry into dictionary; key = OBJECTID, value = geometry
 print "Creating initial dictionaries. This process can take long time if the input layer contains many polygons!"

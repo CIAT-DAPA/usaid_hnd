@@ -5,17 +5,28 @@
 import arcpy
 from arcpy import env
 from arcpy.sa import *
+import os
+
+# Clean terminal
+os.system('cls')
 
 arcpy.CheckOutExtension("spatial")
 arcpy.env.overwriteOutput = True
 
-# polygons = Catchment polygons feature class stored on a database, no shapefile allowed
-polygons = r"D:\ToBackup\Documents\ArcGIS\scratch.gdb\Catchment10000"
+# File Geodatabase
+ws = raw_input("Enter workspace (*.gdb): ")
+
+# Catchment polygons feature class stored on a database, no shapefile allowed
+layer = raw_input("Enter layer name (no shapefile allowed): ")
+
+# Output name
+out_name = raw_input("Enter name of the output layer: ")
 
 # Create a copy of the input layer
-print "Copying layer to a different location"
-final_layer =  arcpy.env.workspace + "\\Catchment10000_Merged"
-inpgs = arcpy.CopyFeatures_management(polygons, final_layer)
+print "Copying layer"
+in_layer =  os.path.join(ws, layer)
+out_layer = os.path.join(ws, out_name)
+inpgs = arcpy.CopyFeatures_management(in_layer, out_layer)
 
 # Read polygon geometry into dictionary; key = HydroID, value = geometry
 print "Creating initial dictionary. This process can take long time if the input layer contains many polygons!"
