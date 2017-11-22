@@ -16,7 +16,8 @@ arcpy.env.overwriteOutput = True
 inpgs = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\Outputs\WPS\WPS_datasets.gdb\Microcuencas_ZOI_Usos_Dissolve"
 
 # Create a copy of the input layer
-final_layer =  arcpy.env.scratchGDB + "/Microcuencas_ZOI_Usos_Dissolve"
+print "Copying layer to a different location"
+final_layer =  arcpy.env.workspace + "\\Microcuencas_ZOI_Usos_Finales"
 polygons = arcpy.CopyFeatures_management(inpgs, final_layer)
 
 # Read polygon geometry into dictionary; key = OBJECTID, value = geometry
@@ -51,15 +52,22 @@ while should_restart:
 			print "Analyzing the polygon with OBJECTID: " + str(oid)
 			print "######################################################"
 			
+			# Get the polygons in the same microwatershed
+			micro_polygons = []
+			for key, value in hydroidDictionary.iteritems():
+				if value == hydroid:
+					micro_polygons.append(key)
+						
 			# Get the neighboring polygons of the analyzed one with the same HydroID (same microwatershed)
 			# areaDictionary = {}
 			borderDictionary = {}
-			for key, value in geometryDictionary.iteritems():
-				if geometry.touches(value) and hydroidDictionary[key] == hydroid:
-					# areaDictionary[key] = value.area
+			for micro_poly in micro_polygons:
+				geom = geometryDictionary[micro_poly]
+				if geometry.touches(geom):
+					# areaDictionary[key] = geom.area
 					# Get the coincident edge between neighboring polygons as a polyline and then store its length
-					border = geometry.intersect(value, 2)
-					borderDictionary[key] = border.length
+					border = geometry.intersect(geom, 2)
+					borderDictionary[micro_poly] = border.length
 
 			if len(borderDictionary) > 0:
 			

@@ -13,7 +13,8 @@ arcpy.env.overwriteOutput = True
 polygons = r"D:\ToBackup\Documents\ArcGIS\scratch.gdb\Catchment10000"
 
 # Create a copy of the input layer
-final_layer =  arcpy.env.scratchGDB + "/Catchment10000"
+print "Copying layer to a different location"
+final_layer =  arcpy.env.workspace + "\\Catchment10000_Merged"
 inpgs = arcpy.CopyFeatures_management(polygons, final_layer)
 
 # Read polygon geometry into dictionary; key = HydroID, value = geometry
