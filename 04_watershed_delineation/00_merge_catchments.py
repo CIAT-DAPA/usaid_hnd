@@ -76,6 +76,8 @@ while should_restart:
 				for ccat in polyrows2:
 					print "\tDeleting the current catchment with HydroID: " + str(grd1)
 					polyrows2.deleteRow(ccat)
+					# Important to delete the item from the geometry dictionary
+					del geometryDictionary[grd1]
 				del ccat
 				del polyrows2
 				

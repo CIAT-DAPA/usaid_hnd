@@ -79,6 +79,9 @@ while should_restart:
 				for poly in polyrows2:
 					print "\tDeleting the current polygon with OBJECTID: " + str(oid)
 					polyrows2.deleteRow(poly)
+					# Important to delete the item from dictionaries
+					del geometryDictionary[oid]
+					del hydroidDictionary[oid]
 				del poly
 				del polyrows2
 				
