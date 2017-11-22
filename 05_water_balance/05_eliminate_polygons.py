@@ -68,7 +68,7 @@ while should_restart:
 				print "\tThe neighboring polygon with the longest coincident edge is : " + str(neighPoly)
 				
 				# Union of both geometries
-				print "\tMerging both geometries......"			
+				print "\tMerging both geometries"			
 				geometries = geometry.union(geometryDictionary[neighPoly])
 					
 				# Query to get the current polygon 
