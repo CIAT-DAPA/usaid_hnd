@@ -116,7 +116,7 @@ while should_restart:
 				should_restart = True
 				break
 
-print "###The resulting layer is saved in " + final_layer + "###"
+print "###The resulting layer is saved in " + out_layer + "###"
 print "DONE!!"
 
 # Do not forget to then run the ArcGIS tool "Spatial Join" with the following configuration:
