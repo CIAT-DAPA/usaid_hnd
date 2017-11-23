@@ -44,8 +44,8 @@ del polyrows
 
 # Fields to be used into the main functions
 fields = ['OBJECTID', 'HydroID', 'SHAPE@']
-# Condition of polygons to be analyzed
-where1 = "Less_1ha = 'si'"
+# Change the value below depending on the minimum polygon area to preserve. Default is 1 ha = 10000 m2
+where1 = '"' + 'Shape_Area' + '" < 10000'
 
 # Loop through polygons that will be eliminated
 should_restart = True
