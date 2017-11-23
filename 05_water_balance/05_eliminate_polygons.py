@@ -1,6 +1,6 @@
 ## Script to eliminate (merge) single polygons (exploded) with areas less than 1ha to a neighboring polygon with the same HydroID (same microwatershed)
 ## The layer used for this process is the resulting one of the intersection between "Microcuencas_ZOI_Finales" and "Usos_2014_ZOI_Finales"
-## Previous work should have done before executing this script like defining the field "Less_1ha"
+## Previous work should have done before executing this script like running the tool "Multipart to Single Part"
 ## Author:  Jefferson Valencia Gomez
 ## E-mail: jefferson.valencia.gomez@gmail.com
 
