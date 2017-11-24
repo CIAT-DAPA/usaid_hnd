@@ -35,11 +35,14 @@ weather_vars = {'precipitation': 'prec', 'potential_evap': 'eto', 'runoff': 'run
                 'water_yield': 'wyield'}
 wettest_month = 9  # User must define the wettest month according to previous analysis
 whc = Float(Raster(os.path.join(tam_in_dir, 'whc60.' + wildcard)))  # Raster of Water Holding Capacity = (FC-WP)*600
-# CNs adjusted for slope (percent_rise) according to Williams et al. (2012)
+# CNs adjusted for slope (percent_rise) according to Huang et al.(2006)
 cn1 = Float(Raster(os.path.join(tam_in_dir, 'cn1_slp_adj.' + wildcard)))  # Curve Number for Moisture Condition 1
 cn2 = Float(Raster(os.path.join(tam_in_dir, 'cn2_slp_adj.' + wildcard)))  # Curve Number for Moisture Condition 2
 cn3 = Float(Raster(os.path.join(tam_in_dir, 'cn3_slp_adj.' + wildcard)))  # Curve Number for Moisture Condition 3
 kc = Float(Raster(os.path.join(tam_in_dir, 'kc.' + wildcard)))  # Kc values multiplied by 1000
+k_dec_apr = Float(Raster(os.path.join(tam_in_dir, 'k_recession1.' + wildcard)))  # Recession constant (k) for Dec-Apr
+k_may_nov = Float(Raster(os.path.join(tam_in_dir, 'k_recession2.' + wildcard)))  # Recession constant (k) for May-Nov
+b = Float(Raster(os.path.join(tam_in_dir, 'b_runoff.' + wildcard)))
 climate_zones = os.path.join(tam_in_dir, 'climate_zones.' + wildcard)
 ids_clim_zones = [row[0] for row in arcpy.da.SearchCursor(climate_zones, 'Value')]
 zoi = os.path.join(tam_in_dir, 'zoi.shp')  # Zone of Interest: Microwatersheds dissolved for the six states
@@ -87,7 +90,6 @@ sstor_ant = 0.9*whc
 bflow_ant = 10
 # Recession constant
 # k = 0.5
-k = Float(Raster(os.path.join(tam_in_dir, 'k_recession.' + wildcard)))
 
 # Main loop to execute both models
 for year in years_execution:
@@ -163,7 +165,8 @@ for year in years_execution:
         prec_in = prec/25.4
         runoff_file = os.path.join(runoff_dir,
                                    weather_vars['runoff'] + '_' + str(year) + '_' + str(month) + '.' + wildcard)
-        runoff_in = Con((-0.095+((0.208*prec_in)/(samc**0.66))) < 0, 0, (-0.095+((0.208*prec_in)/(samc**0.66))))
+        # runoff_in = Con((-0.095+((0.208*prec_in)/(samc**0.66))) < 0, 0, (-0.095+((0.208*prec_in)/(samc**0.66))))
+        runoff_in = Con((-0.095 + ((b * prec_in) / (samc ** 0.66))) < 0, 0, (-0.095 + ((b * prec_in) / (samc ** 0.66))))
         runoff = runoff_in*25.4  # Runoff in mm
         runoff.save(runoff_file)
 
@@ -195,6 +198,11 @@ for year in years_execution:
         print "\tCalculating base flow......"
         bflow_file = os.path.join(bflow_dir,
                                   weather_vars['base_flow'] + '_' + str(year) + '_' + str(month) + '.' + wildcard)
+        # Define which k to use depending on season
+        if month in [12, 1, 2, 3, 4]:
+            k = k_dec_apr
+        else:
+            k = k_may_nov
         bflow = (k * bflow_ant) + ((1 - k) * perc)
         bflow.save(bflow_file)
 
