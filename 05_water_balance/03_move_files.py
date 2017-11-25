@@ -7,7 +7,7 @@
 import os
 import shutil
 
-path = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\Outputs\WPS\Balance_Hidrico\thornthwaite_and_mather"
+path = raw_input("Enter path where the files are stored on: ")
 years = range(1999, 2014 + 1)
 variables = ["aet", "eprec", "perc", "runoff", "sstor", "bflow", "wyield"]
 
