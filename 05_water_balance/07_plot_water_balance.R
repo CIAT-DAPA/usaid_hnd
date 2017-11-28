@@ -30,7 +30,7 @@ months = c("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agos
 
 # read microwatersheds
 poly_shp <- readOGR(mask_shp, layer= "ZOI")
-#poly <- getData('GADM', country='Honduras', level=1)
+# poly_shp <- getData('GADM', country='Honduras', level=1)
 
 # define symbology of blues
 mytheme = rasterTheme(region = brewer.pal(9, "Blues"))
@@ -41,7 +41,6 @@ mytheme$axis.line$col = 'white'  # Eliminate frame from maps
 for (var in varLs){
   
   # Raster stack
-  #rs_stk <- stack(paste0(iDir, "/", var, "/",  var, "_month_", 1:12, ".tif"))
   rs_stk <- stack(paste0(iDir, "/", var, "/",  var, "_month_", 1:12, ".tif"))
   
   cat(var, "\n")
