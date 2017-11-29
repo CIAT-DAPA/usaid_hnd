@@ -37,7 +37,7 @@ poly_shp <- readOGR(mask_shp, layer= "ZOI")
 
 # Define symbology of blues. Number of intervals has to be equal to length(zvalues)-1
 mytheme = rasterTheme(region = brewer.pal(9, "Blues"))
-mytheme$strip.border$col = "white"  # Eliminate frame from maps
+#mytheme$strip.border$col = "white"  # Eliminate frame from maps
 mytheme$axis.line$col = 'white'  # Eliminate frame from maps
 
 # For monthly timescale (average)
@@ -71,7 +71,7 @@ for (var in varLs){
     compression ='lzw')
 
   # scales=list(draw=FALSE) for no labels
-  lvl.plot = levelplot(rs_stk_crop, at= zvalues, scales=list(draw=FALSE), par.settings=mytheme, main=plot.title, colorkey = list(space = "bottom"))
+  lvl.plot = levelplot(rs_stk_crop, at= zvalues, scales=list(draw=FALSE), par.settings=mytheme, main=plot.title)
   
   print(lvl.plot  + layer(sp.polygons(poly_shp)))
 
