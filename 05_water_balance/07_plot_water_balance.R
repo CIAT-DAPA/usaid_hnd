@@ -28,11 +28,14 @@ mask_shp <- paste0(net_drive, "/06_analysis/Scenarios/masks/ZOI.shp")
 
 months = c("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
 
+# Temporal folder for raster calculations
+if (!file.exists(paste0(oDir, "/tmp"))) {dir.create(paste0(oDir, "/tmp"), recursive = TRUE)}
+rasterOptions(tmpdir= paste0(oDir, "/tmp"))
+
 # read microwatersheds
 poly_shp <- readOGR(mask_shp, layer= "ZOI")
-# poly_shp <- getData('GADM', country='Honduras', level=1)
 
-# define symbology of blues
+# Define symbology of blues. Number of intervals has to be equal to length(zvalues)-1
 mytheme = rasterTheme(region = brewer.pal(9, "Blues"))
 mytheme$strip.border$col = "white"  # Eliminate frame from maps
 mytheme$axis.line$col = 'white'  # Eliminate frame from maps
@@ -50,7 +53,11 @@ for (var in varLs){
   rs_stk_crop <- crop(rs_stk, extent(poly_shp))
   extent(rs_stk_crop) <- extent(poly_shp)
   names(rs_stk_crop) = months
-  #plot(rs_stk_crop)
+
+  # Minimum and maximum values of the stack raster
+  min.value = min(minValue(rs_stk_crop))
+  max.value = max(maxValue(rs_stk_crop))
+  zvalues =  seq(min.value, max.value, length.out = 10)
   
   # plot title
   plot.title = paste0(dicVar[var], " (mm)\n2000-2014")
@@ -65,12 +72,12 @@ for (var in varLs){
     compression ='lzw')
 
   # scales=list(draw=FALSE) for no labels
-  lvl.plot = levelplot(rs_stk_crop, scales=list(draw=FALSE), par.settings=mytheme, main=plot.title, colorkey = list(space = "bottom"))
+  lvl.plot = levelplot(rs_stk_crop, at= zvalues, scales=list(draw=FALSE), par.settings=mytheme, main=plot.title, colorkey = list(space = "bottom"))
   
   print(lvl.plot  + layer(sp.polygons(poly_shp)))
 
   dev.off()
- 
-  # Delete temp files
-  unlink(rasterOptions()$tmpdir, recursive=TRUE)
 }
+
+# Delete temp files
+unlink(rasterOptions()$tmpdir, recursive=TRUE)
