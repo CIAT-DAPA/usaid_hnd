@@ -32,7 +32,7 @@ months = c("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agos
 if (!file.exists(paste0(oDir, "/tmp"))) {dir.create(paste0(oDir, "/tmp"), recursive = TRUE)}
 rasterOptions(tmpdir= paste0(oDir, "/tmp"))
 
-# read microwatersheds
+# Read ZOI
 poly_shp <- readOGR(mask_shp, layer= "ZOI")
 
 # Define symbology of blues. Number of intervals has to be equal to length(zvalues)-1
@@ -49,7 +49,6 @@ for (var in varLs){
   cat(var, "\n")
 
   # create raster stack
-  #rs_stk_crop = mask(crop(rs_stk, extent(poly)), poly)
   rs_stk_crop <- crop(rs_stk, extent(poly_shp))
   extent(rs_stk_crop) <- extent(poly_shp)
   names(rs_stk_crop) = months
@@ -62,7 +61,7 @@ for (var in varLs){
   # plot title
   plot.title = paste0(dicVar[var], " (mm)\n2000-2014")
   
-  # Guardar plot como Tiff. Cambiar el nombre de la imagen
+  # Save plot as Tiff
   image = file.path(oDir, paste0(var, "_monthly.tiff"))
   tiff(
     file = image,
