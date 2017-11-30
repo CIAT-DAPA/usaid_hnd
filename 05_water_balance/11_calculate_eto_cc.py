@@ -10,7 +10,8 @@ from calendar import monthrange
 
 arcpy.CheckOutExtension("spatial")
 arcpy.env.overwriteOutput = True
-arcpy.env.cellSize = "MINOF"
+arcpy.env.cellSize = "1000 1000"
+arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984 UTM Zone 16N")
 
 ## Inputs
 #############################################################################################################################################
@@ -57,10 +58,12 @@ for scenario in scenarios:
     print "########################################"
 
     eto_dir = os.path.join(in_folders, scenario, "eto")
+    tmean_dir = os.path.join(in_folders, scenario, "tmean")
 
     for year in period:
         num_dias_year = calculaJulianDay(year, 12, 31)
         folder_exists(os.path.join(eto_dir, str(year)))
+        folder_exists(os.path.join(tmean_dir, str(year)))
 
         for month in months:
             print "Processing year:" + str(year) + ", month:" + str(month)
@@ -77,10 +80,12 @@ for scenario in scenarios:
             tmax = Raster(os.path.join(in_folders, scenario, "tmax", str(year), "tmax_" + str(year) + "_" + str(month) + ".tif"))
             tmin = Raster(os.path.join(in_folders, scenario, "tmin", str(year), "tmin_" + str(year) + "_" + str(month) + ".tif"))
 
-            print "\tCalculating Mean Temperature........"
+            print "\tCalculating mean temperature........"
             tav = (tmax + tmin) / 2
+            tmean_file = "tmean_" + str(year) + "_" + str(month) + ".tif"
+            tav.save(os.path.join(tmean_dir, str(year), tmean_file))
 
-            print "\tCalculating Difference Temperature........"
+            print "\tCalculating difference temperature........"
             td = tmax - tmin
 
             print "\tCalculating potential evapotranspiration........"
