@@ -13,15 +13,28 @@ require(rasterVis)
 net_drive = "Y:"
 
 scenario = "rcp2.6_2030"
+# scenario = "baseline"
 
 # Arguments
+
+#iDir <- paste0(net_drive, "/Inputs/WPS/Balance_Hidrico/climate_change/downscaled_ensemble/", scenario)
+# iDir <- paste0(net_drive, "/Inputs/WPS/Balance_Hidrico/shared") # This line goes with line # 16
+#varLs <- c("prec", "eto", "tmax", "tmin", "tmean")
+#varRs <- c("Precipitación", "Evapotranspiración de Referencia", "Temperatura Máxima", "Temperatura Mínima", "Temperatura Promedio")
+
 iDir <- paste0(net_drive, "/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather/", scenario)
-# varLs <- c("prec", "eto", "tmax", "tmin")
-# varRs <- c("Precipitación", "Evapotranspiración de Referencia", "Temperatura Máxima", "Temperatura Mínima")
 varLs <- c("aet", "eprec", "perc", "runoff", "sstor", "bflow", "wyield")
 varRs <- c("Evapotranspiración Real", "Precipitacón Efectiva", "Percolación", "Escorrentía Superficial", "Humedad del Suelo", "Flujo Base", "Aporte de Agua")
+
 dicVar <- vector(mode="list", length=length(varLs))
 names(dicVar) = varLs
+subtitle = "2000-2014"
+cc_sce = c("rcp2.6_2030", "rcp2.6_2050", "rcp8.5_2030", "rcp8.5_2050")
+
+if (scenario %in% cc_sce){
+  split_text = strsplit(scenario, "_")[[1]]
+  subtitle = paste0(toupper(split_text[1]), " ", split_text[2])
+}
 
 for (i in 1:length(varLs)){
   dicVar[[i]] <- varRs[i]
@@ -39,22 +52,32 @@ rasterOptions(tmpdir= paste0(oDir, "/tmp"))
 # Read ZOI
 poly_shp <- readOGR(mask_shp, layer= "ZOI")
 
-# Define symbology of blues. Number of intervals has to be equal to length(zvalues)-1
-mytheme = rasterTheme(region = brewer.pal(9, "Blues"))
-#mytheme$strip.border$col = "white"  # Eliminate frame from maps
-mytheme$axis.line$col = 'white'  # Eliminate frame from maps
-
 # For monthly timescale (average)
 for (var in varLs){
+  
+  if (var %in% varLs[3:5]){
+    # Define symbology of yellow/reds. Number of intervals has to be equal to length(zvalues)-1
+    mytheme = rasterTheme(region = brewer.pal(9, "YlOrRd"))
+    units = "ºC"
+  }
+  else{
+    # Define symbology of blues. Number of intervals has to be equal to length(zvalues)-1
+    mytheme = rasterTheme(region = brewer.pal(9, "Blues"))
+    units = "mm"
+  }
+  
+  #mytheme$strip.border$col = "white"  # Eliminate frame from maps
+  mytheme$axis.line$col = 'white'  # Eliminate frame from maps
   
   # Raster stack
   rs_stk <- stack(paste0(iDir, "/", var, "/",  var, "_month_", 1:12, ".tif"))
   
   cat(var, "\n")
 
-  # create raster stack
-  rs_stk_crop <- crop(rs_stk, extent(poly_shp))
-  extent(rs_stk_crop) <- extent(poly_shp)
+  # Crop and mask raster stack
+  #rs_stk_crop <- crop(rs_stk, extent(poly_shp))
+  #extent(rs_stk_crop) <- extent(poly_shp)
+  rs_stk_crop <- mask(crop(rs_stk, extent(poly_shp)), poly_shp)
   names(rs_stk_crop) = months
 
   # Minimum and maximum values of the stack raster
@@ -63,7 +86,7 @@ for (var in varLs){
   zvalues =  seq(min.value, max.value, length.out = 10)
   
   # plot title
-  plot.title = paste0(dicVar[var], " (mm)\n2000-2014")
+  plot.title = paste0(dicVar[var], " (", units, ")\n", subtitle)
   
   # Save plot as Tiff
   image = file.path(oDir, paste0(var, "_monthly.tiff"))
