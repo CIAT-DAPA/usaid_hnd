@@ -55,7 +55,7 @@ poly_shp <- readOGR(mask_shp, layer= "ZOI")
 # For monthly timescale (average)
 for (var in varLs){
   
-  if (var %in% varLs[3:5]){
+  if (var %in% c("tmax", "tmin", "tmean")){
     # Define symbology of yellow/reds. Number of intervals has to be equal to length(zvalues)-1
     mytheme = rasterTheme(region = brewer.pal(9, "YlOrRd"))
     units = "ºC"
