@@ -12,8 +12,12 @@ require(rasterVis)
 # Network drive
 net_drive = "Y:"
 
+scenario = "rcp2.6_2030"
+
 # Arguments
-iDir <- paste0(net_drive, "/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather/final")
+iDir <- paste0(net_drive, "/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather/", scenario)
+# varLs <- c("prec", "eto", "tmax", "tmin")
+# varRs <- c("Precipitación", "Evapotranspiración de Referencia", "Temperatura Máxima", "Temperatura Mínima")
 varLs <- c("aet", "eprec", "perc", "runoff", "sstor", "bflow", "wyield")
 varRs <- c("Evapotranspiración Real", "Precipitacón Efectiva", "Percolación", "Escorrentía Superficial", "Humedad del Suelo", "Flujo Base", "Aporte de Agua")
 dicVar <- vector(mode="list", length=length(varLs))
@@ -23,7 +27,7 @@ for (i in 1:length(varLs)){
   dicVar[[i]] <- varRs[i]
 }
 
-oDir <- paste0(net_drive, "/Outputs/WPS/Balance_Hidrico/maps/final")
+oDir <- paste0(net_drive, "/Outputs/WPS/Balance_Hidrico/maps/", scenario)
 mask_shp <- paste0(net_drive, "/06_analysis/Scenarios/masks/ZOI.shp")
 
 months = c("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
