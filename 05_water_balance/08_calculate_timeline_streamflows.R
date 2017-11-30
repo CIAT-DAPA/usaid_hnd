@@ -58,7 +58,7 @@ for (i in 1:length(str_net$id)){
       # Average by columns
       avg_cats = apply(row_cats[-1], 2, mean)
       
-      # Get streamflow (m3/s) contributed by the whole drainage area including the catchment being analyzed
+      # Get streamflow (m3/s) contributed by the upstream drainage area without including the catchment being analyzed
       # monthly_flow_m3s_all = (avg_cats/1000)*total_area_m2/(30.42*86400)
       monthly_flow_m3s_all = (avg_cats/1000)*upstr_area_m2/(30.42*86400)
       
