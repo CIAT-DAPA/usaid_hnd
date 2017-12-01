@@ -5,11 +5,14 @@
 # Network drive
 net_drive = "Y:"
 
-# runoff = read.csv(paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_runoff.csv"))
-# bflow = read.csv(paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_bflow.csv"))
-wyield = read.csv(paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_wyield.csv"))
+scenario = "rcp2.6_2030"
+# scenario = "baseline"
+
+# runoff = read.csv(paste0(net_drive, "/06_analysis/Scenarios/", scenario, "/mth_yearly_timeline_runoff.csv"))
+# bflow = read.csv(paste0(net_drive, "/06_analysis/Scenarios/", scenario, "/mth_yearly_timeline_bflow.csv"))
+wyield = read.csv(paste0(net_drive, "/06_analysis/Scenarios/", scenario, "/mth_yearly_timeline_wyield.csv"))
 str_net = read.csv(paste0(net_drive, "/Outputs/WPS/Delimitacion_Cuencas/stream_network_ZOI_WPS_updated.csv"))
-oDir = paste0(net_drive, "/06_analysis/Extracts_MicroCuencas")
+oDir = paste0(net_drive, "/06_analysis/Scenarios/", scenario)
 yi <- "2000"
 yf <- "2014"
 years = yi:yf

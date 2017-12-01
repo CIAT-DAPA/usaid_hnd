@@ -14,17 +14,20 @@ require(doSNOW)
 # Network drive
 net_drive = "Y:"
 
+scenario = "rcp2.6_2030"
+# scenario = "baseline"
+
 # Output variables of water balance
-iDir <- paste0(net_drive,"/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather")
+iDir <- paste0(net_drive,"/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather/", scenario)
 # Possible options: "aet", "eprec", "perc", "runoff", "sstor", "bflow", "wyield"
 var = "bflow"
 
 # Prefix of the output CSV file
 prefix = "mth_yearly_timeline"
 
-oDir <- paste0(net_drive, "/06_analysis/Extracts_MicroCuencas")
+oDir <- paste0(net_drive, "/06_analysis/Scenarios/", scenario)
 # Shapefile of microwatersheds 
-mask <- paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mask/MicroCuencas_ZOI_Finales.shp")
+mask_shp <- paste0(net_drive, "/06_analysis/Scenarios/masks/MicroCuencas_ZOI_Finales.shp")
 # Years of simulation without warm-up year of the water balance
 yi <- "2000"
 yf <- "2014"
@@ -49,7 +52,7 @@ progress <- function(n) setTxtProgressBar(pb, n)
 opts <- list(progress=progress)
 
 
-zonalStatistic <- function(var, year, poly, iDir, months = 1:12, id = "HydroID", math.operation = "mean"){
+zonalStatistic <- function(var, year, poly_shp, scenario, iDir, months = 1:12, id = "HydroID", math.operation = "mean"){
   
   cat("\n####################################################\n")
   cat(paste0("Analyzing variable ", var, " ......\n"))
@@ -62,28 +65,29 @@ zonalStatistic <- function(var, year, poly, iDir, months = 1:12, id = "HydroID",
   rs_stk <- stack(rasters)
 
   
-  cat("\tCroping raster stack with mask ......\n")
-  # Convert polygons to raster with a specific ID
-  rs_stk_crop <- crop(rs_stk, extent(poly))
-  extent(rs_stk_crop) <- extent(poly)
+  cat("\tCroping raster stack with mask_shp ......\n")
+  # Convert poly_shpgons to raster with a specific ID
+  rs_stk_crop <- crop(rs_stk, extent(poly_shp))
+  extent(rs_stk_crop) <- extent(poly_shp)
   cat("\tRasterizing microwatersheds ......\n")
-  poly_rs <- rasterize(poly, rs_stk_crop[[1]], as.integer(levels(poly@data[id][[1]])))
+  #poly_shp_rs <- rasterize(poly_shp, rs_stk_crop[[1]], as.integer(levels(poly_shp@data[id][[1]])))
+  poly_shp_rs <- rasterize(poly_shp, rs_stk_crop[[1]], as.integer(poly_shp@data[id][[1]]))
   
   cat("\tCarrying out the zonal statistic operation ......\n")
   # Get the zonal statistics
-  rs_zonal <- zonal(rs_stk_crop, poly_rs, math.operation)
+  rs_zonal <- zonal(rs_stk_crop, poly_shp_rs, math.operation)
   
   return(rs_zonal)
   
 }
 
-# Read mask and convert it to SpatialPolygonsDataFrame
-poly <- readOGR(mask) 
+# Read mask_shp and convert it to Spatialpoly_shpgonsDataFrame
+poly_shp <- readOGR(mask_shp) 
 
 # Execute process in parallel and store the results in the variable data
 data = foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow=opts, .combine=cbind, .verbose=TRUE) %dopar% {
   
-  zonalStatistic(var, years[i], poly, iDir, months)
+  zonalStatistic(var, years[i], poly_shp, scenario, iDir, months)
   
 } 
 

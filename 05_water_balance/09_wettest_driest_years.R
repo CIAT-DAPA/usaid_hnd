@@ -5,10 +5,13 @@
 # Network drive
 net_drive = "Y:"
 
+scenario = "rcp2.6_2030"
+# scenario = "baseline"
+
 # Yearly-montly variables
-prec = read.csv(paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_prec.csv"))
-sflow = read.csv(paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mth_yearly_timeline_sflow.csv"))
-oDir = paste0(net_drive, "/06_analysis/Extracts_MicroCuencas")
+prec = read.csv(paste0(net_drive, "/06_analysis/Scenarios/", scenario, "/mth_yearly_timeline_prec.csv"))
+sflow = read.csv(paste0(net_drive, "/06_analysis/Scenarios/", scenario, "/mth_yearly_timeline_sflow.csv"))
+oDir = paste0(net_drive, "/06_analysis/Scenarios/", scenario)
 
 yi <- "2000"
 yf <- "2014"

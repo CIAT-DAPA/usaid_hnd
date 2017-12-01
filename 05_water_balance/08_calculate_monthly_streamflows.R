@@ -5,9 +5,12 @@
 # Network drive
 net_drive = "Y:"
 
-all_vars = read.csv(paste0(net_drive, "/06_analysis/Extracts_MicroCuencas/mth_avg_timeline_all_vars.csv"))
+scenario = "rcp2.6_2030"
+# scenario = "baseline"
+
+all_vars = read.csv(paste0(net_drive, "/06_analysis/Scenarios/", scenario, "/mth_avg_timeline_all_vars.csv"))
 str_net = read.csv(paste0(net_drive, "/Outputs/WPS/Delimitacion_Cuencas/stream_network_ZOI_WPS_updated.csv"))
-oDir = paste0(net_drive, "/06_analysis/Extracts_MicroCuencas")
+oDir = paste0(net_drive, "/06_analysis/Scenarios/", scenario)
 months = 1:12
 
 for (i in 1:length(str_net$id)){

@@ -18,7 +18,7 @@ scenario = "rcp2.6_2030"
 # Arguments
 
 #iDir <- paste0(net_drive, "/Inputs/WPS/Balance_Hidrico/climate_change/downscaled_ensemble/", scenario)
-# iDir <- paste0(net_drive, "/Inputs/WPS/Balance_Hidrico/shared") # This line goes with line # 16
+#iDir <- paste0(net_drive, "/Inputs/WPS/Balance_Hidrico/shared") # This line goes with line # 16
 #varLs <- c("prec", "eto", "tmax", "tmin", "tmean")
 #varRs <- c("Precipitación", "Evapotranspiración de Referencia", "Temperatura Máxima", "Temperatura Mínima", "Temperatura Promedio")
 

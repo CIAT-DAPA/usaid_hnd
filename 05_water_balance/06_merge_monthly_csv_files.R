@@ -2,7 +2,10 @@
 ### Author: Jefferson Valencia Gomez
 ### email: j.valencia@cgiar.org, jefferson.valencia.gomez@gmail.com
 
-path = "Y:/06_Analysis/Extracts_MicroCuencas"
+scenario = "rcp2.6_2030"
+# scenario = "baseline"
+
+path = paste0("Y:/06_Analysis/Scenarios/", scenario)
 setwd(path)
 
 # List of CVS files with a specific pattern
