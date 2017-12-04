@@ -55,8 +55,8 @@ for (i in 1:length(prec[,1])){
   # Get the row (HydroID of the microwatershed) from the flow data
   match_row = which(sflow[1] == id)
   # Columns to be extracted
-  min_columns = c(paste0("caudal_", min_year, "_", months), paste0("caudal_total_", min_year, "_", months))
-  max_columns = c(paste0("caudal_", max_year, "_", months), paste0("caudal_total_", max_year, "_", months))
+  min_columns = c(paste0("caudal_", min_year, "_", months), paste0("caudal_agar_", min_year, "_", months))
+  max_columns = c(paste0("caudal_", max_year, "_", months), paste0("caudal_agar_", max_year, "_", months))
   # Get the min and max values
   min_values = sflow[match_row, min_columns]
   max_values = sflow[match_row, max_columns]
