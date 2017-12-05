@@ -1,5 +1,5 @@
-### Zonal statistical (mean) by microwatershed of all the variables involved into the water balance
-### Use this script only for input and output variables at montly timescale. Also for yearly-monthly timescale but only for input variables
+### Zonal statistical (mean) by microwatershed-land use/land cover
+### Use this script only for the output variable "wyield" at montly timescale
 ### Author: Jefferson Valencia Gomez
 ### email: j.valencia@cgiar.org, jefferson.valencia.gomez@gmail.com
 ### Contribution: Carlos Navarro <c.e.navarro@cgiar.org>
