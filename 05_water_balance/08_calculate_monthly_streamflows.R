@@ -37,7 +37,8 @@ for (i in 1:length(str_net$id)){
     monthly_flow_m3s = (all_vars[match_row, (num_columns-12):(num_columns-1)]/1000)*area_m2/(30.42*86400)
     
     if (upstr_cats[1] == ""){
-      all_flows = rep(monthly_flow_m3s, 2)
+      # all_flows = rep(monthly_flow_m3s, 2)
+      all_flows = c(monthly_flow_m3s, rep(0, length(monthly_flow_m3s)))
     }
     else{
       # cats = as.integer(c(id, upstr_cats))

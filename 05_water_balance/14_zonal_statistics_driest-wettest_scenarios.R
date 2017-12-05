@@ -19,18 +19,17 @@ scenario = "driest_year"
 
 # Output variables of water balance
 iDir <- paste0(net_drive,"/Outputs/WPS/Balance_Hidrico/thornthwaite_and_mather/baseline")
-ifile <- read.csv(paste0(net_drive, "/06_analysis/Scenarios/", scenario, "/", scenario, "_prec.csv"))
-varLs <- ("wyield")  
+iFile <- read.csv(paste0(net_drive, "/06_analysis/Scenarios/", scenario, "/", scenario, "_prec.csv"))
+varLs <- "wyield"
 
 oDir <- paste0(net_drive, "/06_analysis/Scenarios/", scenario)
 # Shapefile of microwatersheds 
 mask_shp <- paste0(net_drive, "/06_analysis/Scenarios/masks/Microcuencas_ZOI_Usos4_Finales.shp")
-# Years of simulation without warm-up year of the water balance
-yi <- "2000"
-yf <- "2014"
-years = yi:yf
+# Unique years of the scenario
+years = sort(unique(iFile$Ano))
 
 months = 1:12
+prefix = "mth_avg_timeline_microusos"
 
 # Temporal folder for raster calculations
 if (!file.exists(paste0(oDir, "/tmp"))) {dir.create(paste0(oDir, "/tmp"), recursive = TRUE)}
@@ -43,21 +42,20 @@ cl = makeCluster(ncores)
 registerDoSNOW(cl)
 
 # configuration of progress bar
-length_run <- length(varLs)
+length_run <- length(years)
 pb <- txtProgressBar(max = length_run, style = 3)
 progress <- function(n) setTxtProgressBar(pb, n) 
 opts <- list(progress=progress)
 
 
-zonalStatistic <- function(var, poly_shp, iDir, oDir, months = 1:12, years, id = "HydroID", math.operation = "mean"){
+zonalStatistic <- function(year, var, polys, iDir, months = 1:12, id = "HydroID", math.operation = "mean"){
   
   cat("\n####################################################\n")
-  cat(paste0("Analyzing variable ", var, " ......\n"))
+  cat(paste0("Analyzing year ", year, " ......\n"))
   cat("####################################################\n")
   
   # For monthly timescale
-  rasters = paste0(iDir, "/", var, "/",  var, "_month_", months, ".tif")
-  prefix = "mth_avg_timeline_microusos"
+  rasters = paste0(iDir, "/", var, "/", year , "/", var, "_", year, "_", months, ".tif")
 
   cat("\tCreating raster stack ......\n")
   # Raster stack
@@ -65,31 +63,40 @@ zonalStatistic <- function(var, poly_shp, iDir, oDir, months = 1:12, years, id =
 
   cat("\tCroping raster stack with mask_shp ......\n")
   # Convert poly_shpgons to raster with a specific ID
-  rs_stk_crop <- crop(rs_stk, extent(poly_shp))
-  extent(rs_stk_crop) <- extent(poly_shp)
+  rs_stk_crop <- crop(rs_stk, extent(polys))
+  extent(rs_stk_crop) <- extent(polys)
   cat("\tRasterizing microwatersheds ......\n")
-  #poly_shp_rs <- rasterize(poly_shp, rs_stk_crop[[1]], as.integer(levels(poly_shp@data[id][[1]])))
-  poly_shp_rs <- rasterize(poly_shp, rs_stk_crop[[1]], as.integer(poly_shp@data[id][[1]]))
+  #poly_shp_rs <- rasterize(polys, rs_stk_crop[[1]], as.integer(levels(polys@data[id][[1]])))
+  polys_rs <- rasterize(polys, rs_stk_crop[[1]], as.integer(polys@data[id][[1]]))
   
   cat("\tCarrying out the zonal statistic operation ......\n")
   # Get the zonal statistics
-  rs_zonal <- zonal(rs_stk_crop, poly_shp_rs, math.operation)
+  rs_zonal <- zonal(rs_stk_crop, polys_rs, math.operation)
   
-  cat("\tWriting the CSV file ......\n")
-  # Write the outputs
-  write.csv(rs_zonal, paste0(oDir, "/", prefix, "_", var, ".csv"), row.names=F)
-  
+  return(rs_zonal)
+
 }
 
 # Read mask_shp and convert it to Spatialpoly_shpgonsDataFrame
 poly_shp <- readOGR(mask_shp) 
 
-# Execute process in parallel
-foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow=opts, .verbose=TRUE) %dopar% {
+# Execute process in parallel and store the results in the variable data
+data = foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow=opts, .combine=rbind, .verbose=TRUE) %dopar% {
   
-  zonalStatistic(varLs[i], poly_shp, iDir, oDir, months, years, id = "OBJECTID")
+  year = years[i]
+  hydroids = iFile$HydroID[iFile$Ano == year]
+  polys = poly_shp[poly_shp$HydroID %in% hydroids,]
   
-}
+  zonalStatistic(year, var, polys, iDir, months, id = "OBJECTID")
+  
+} 
+
+# Replaces the word "zone" for "HydroID"
+colnames(data)[1] = "HydroID"
+
+cat("\tWriting the CSV file ......\n")
+# Write the outputs
+write.csv(data, paste0(oDir, "/", prefix, "_", var, ".csv"), row.names=F)
 
 # It is important to stop the cluster, even when the script is stopped abruptly
 stopCluster(cl)
