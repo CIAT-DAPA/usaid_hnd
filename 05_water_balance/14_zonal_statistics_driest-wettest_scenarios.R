@@ -73,6 +73,9 @@ zonalStatistic <- function(year, var, polys, iDir, months = 1:12, id = "HydroID"
   # Get the zonal statistics
   rs_zonal <- zonal(rs_stk_crop, polys_rs, math.operation)
   
+  # Set the colum names to avoid problems with rbind
+  colnames(rs_zonal) = c(id, paste0(var, "_month_", months))
+  
   return(rs_zonal)
 
 }
@@ -90,9 +93,6 @@ data = foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow
   zonalStatistic(year, var, polys, iDir, months, id = "OBJECTID")
   
 } 
-
-# Replaces the word "zone" for "HydroID"
-colnames(data)[1] = "HydroID"
 
 cat("\tWriting the CSV file ......\n")
 # Write the outputs

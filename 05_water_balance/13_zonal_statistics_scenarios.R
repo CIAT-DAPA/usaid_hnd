@@ -84,8 +84,8 @@ data = foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow
 # Remove repeated columns
 final_data = data[,-which(colnames(data) == "zone")[-1]]
 
-# Replaces the word "zone" for "HydroID"
-colnames(final_data)[1] = "HydroID"
+# Replaces the word "zone" for "OBJECTID"
+colnames(final_data)[1] = "OBJECTID"
 
 cat("\tWriting the CSV file ......\n")
 # Write the outputs
