@@ -62,7 +62,7 @@ zonalStatistic <- function(year, var, polys, iDir, months = 1:12, id = "HydroID"
   rs_stk <- stack(rasters)
 
   cat("\tCroping raster stack with mask_shp ......\n")
-  # Convert poly_shpgons to raster with a specific ID
+  # Convert polygons to raster with a specific ID
   rs_stk_crop <- crop(rs_stk, extent(polys))
   extent(rs_stk_crop) <- extent(polys)
   cat("\tRasterizing microwatersheds ......\n")
