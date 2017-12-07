@@ -90,7 +90,7 @@ data = foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow
   hydroids = iFile$HydroID[iFile$Ano == year]
   polys = poly_shp[poly_shp$HydroID %in% hydroids,]
   
-  zonalStatistic(year, var, polys, iDir, months, id = "OBJECTID")
+  zonalStatistic(year, var, polys, iDir, months, id = "IDMicroUso")
   
 } 
 

@@ -77,7 +77,7 @@ poly_shp <- readOGR(mask_shp)
 # Execute process in parallel and store the results in the variable data
 data = foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow=opts, .combine=cbind, .verbose=TRUE) %dopar% {
   
-  zonalStatistic(months[i], var, poly_shp, iDir, id = "OBJECTID")
+  zonalStatistic(months[i], var, poly_shp, iDir, id = "IDMicroUso")
   
 } 
 
@@ -85,7 +85,7 @@ data = foreach(i = 1:length_run, .packages = c('raster', 'rgdal'), .options.snow
 final_data = data[,-which(colnames(data) == "zone")[-1]]
 
 # Set the colum names
-colnames(final_data) = c("OBJECTID", paste0(var, "_month_", months))
+colnames(final_data) = c("IDMicroUso", paste0(var, "_month_", months))
 
 cat("\tWriting the CSV file ......\n")
 # Write the outputs

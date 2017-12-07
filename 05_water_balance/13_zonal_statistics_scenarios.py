@@ -35,7 +35,10 @@ months = range(1, 12 + 1)
 polygons = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\06_analysis\Scenarios\masks\Microcuencas_ZOI_Usos4_Finales.shp"
 
 # Field for the zonal statistics
-field = "OBJECTID"
+field = "IDMicroUso"
+
+# Stat. operation
+statOperation = "MEAN"
 
 # Select output folder for saving the output - zonal tables (.dbf files)
 outDir = env.scratchFolder
@@ -48,7 +51,7 @@ for month in months:
 
     print "Executing ZonalStatisticsAsTable......"
     # Execute ZonalStatisticsAsTable
-    ZonalStatisticsAsTable(polygons, field, os.path.join(in_folder, scenario, var, raster), outTable, "DATA", "MEAN")
+    ZonalStatisticsAsTable(polygons, field, os.path.join(in_folder, scenario, var, raster), outTable, "DATA", statOperation)
 
     outTable2 = outDir + "\\" + raster[0:-4] + ".csv"
 
@@ -57,19 +60,17 @@ for month in months:
     arcpy.TableToTable_conversion(outTable, outDir, raster[0:-4] + ".csv")
 
     print "Reading CSV file......\n"
-    if month == 1:
-        with open(outTable2) as csvfile:
-            readCSV = csv.reader(csvfile, delimiter=',')
-            next(readCSV)  # Skip header row
-            final_data = [[int(line[1]), float(line[4])] for line in readCSV]  # Header not included
-    else:
-        with open(outTable2) as csvfile:
-            readCSV = csv.reader(csvfile, delimiter=',')
-            next(readCSV)  # Skip header row
-            data2 = [line[4] for line in readCSV]  # Header not included
-
-        for i in range(0, len(final_data)):
-            final_data[i] = final_data[i] + [float(data2[i])]
+    with open(outTable2) as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        headerCSV = readCSV.next()  # Get and skip header row
+        idField = headerCSV.index(field)
+        staOpField = headerCSV.index(statOperation)
+        if month == 1:
+            final_data = [[str(line[idField]), float(line[staOpField])] for line in readCSV]  # Header not included
+        else:
+            data2 = [line[staOpField] for line in readCSV]  # Header not included
+            for i in range(0, len(final_data)):
+                final_data[i] = final_data[i] + [float(data2[i])]
 
 
 vars = [var + "_month_" + str(x) for x in months]			
