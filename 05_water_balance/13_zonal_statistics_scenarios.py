@@ -27,12 +27,9 @@ os.system("cls")
 scenario = raw_input("Type scenario: ")
 in_folder = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\Outputs\WPS\Balance_Hidrico\thornthwaite_and_mather"
 out_folder = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\06_analysis\Scenarios"
-out_file = "mth_avg_timeline_microusos_wyield2.csv" 
 var = "wyield"
+out_file = "mth_avg_timeline_microusos_" + var + ".csv"
 months = range(1, 12 + 1)
-
-# Select the folder containing raster files.
-env.workspace = os.path.join(in_folder, scenario, var)
 
 # Select the shapefile containing the polygons to use as boundaries for zonal statistics
 polygons = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\06_analysis\Scenarios\masks\Microcuencas_ZOI_Usos4_Finales.shp"
@@ -46,12 +43,12 @@ outDir = env.scratchFolder
 final_data = []
 for month in months:
     raster = var + "_month_" + str(month) + ".tif"
-    print "\t### Processing month " + str(month) + " ####"
+    print "\t### Processing month " + str(month) + " ###"
     outTable = outDir + "\\" + raster[0:-4] + ".dbf"
 
     print "Executing ZonalStatisticsAsTable......"
     # Execute ZonalStatisticsAsTable
-    ZonalStatisticsAsTable(polygons, field, raster, outTable, "DATA", "MEAN")
+    ZonalStatisticsAsTable(polygons, field, os.path.join(in_folder, scenario, var, raster), outTable, "DATA", "MEAN")
 
     outTable2 = outDir + "\\" + raster[0:-4] + ".csv"
 

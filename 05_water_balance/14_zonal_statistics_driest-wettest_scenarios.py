@@ -1,0 +1,128 @@
+# -*- coding: utf-8 -*-
+# Zonal statistical (mean) by microwatershed-land use/land cover for the wettest and driest years
+# Use this script only for the output variable "wyield" at montly timescale
+
+# Author: Jefferson Valencia Gomez
+# Email: j.valencia@cgiar.org, jefferson.valencia.gomez@gmail.com
+# Year: 2017
+
+import arcpy
+import os
+import csv
+from arcpy import env
+from arcpy.sa import *
+
+arcpy.env.overwriteOutput = True
+
+# Check out any necessary licenses
+arcpy.CheckOutExtension("Spatial")
+
+# Use 80% of the cores on the machine
+env.parallelProcessingFactor = "100%"
+
+# Let's clean console
+os.system("cls")
+
+# Input variables
+scenario = raw_input("Type scenario: ")
+in_folder = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\Outputs\WPS\Balance_Hidrico\thornthwaite_and_mather"
+iFile = os.path.join(r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\06_analysis\Scenarios", scenario, scenario + "_prec.csv")
+out_folder = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\06_analysis\Scenarios"
+var = "wyield"
+out_file = "mth_avg_timeline_microusos_" + var + ".csv"
+months = range(1, 12 + 1)
+
+# Select the shapefile containing the polygons to use as boundaries for zonal statistics
+polygons = r"\\dapadfs\workspace_cluster_6\Ecosystem_Services\Water_Planning_System\06_analysis\Scenarios\masks\Microcuencas_ZOI_Usos4_Finales.shp"
+
+# Field for the zonal statistics
+field = "OBJECTID"
+
+# Field for making query
+field_query = "HydroID"
+
+# Select output folder for saving the output - zonal tables (.dbf files)
+outDir = env.scratchFolder
+
+dataDic = {}
+# Read input csv file
+with open(iFile) as csvfile:
+    readCSV = csv.reader(csvfile, delimiter=',')
+    next(readCSV)  # Skip header row
+    for row in readCSV:
+        dataDic[int(row[0])] = int(row[1])
+
+# Get unique years
+uniqueYears = list(set(dataDic.values()))
+
+# Make a layer from the feature class
+arcpy.MakeFeatureLayer_management(polygons, "polygons_lyr")
+
+final_data = []
+for year in uniqueYears:
+    print "\t\t#### Processing year " + str(year) + " #####"
+
+    # Clean selected features
+    arcpy.SelectLayerByAttribute_management("polygons_lyr", "CLEAR_SELECTION")
+
+    for key, value in dataDic.iteritems():
+        if value == year:
+            query = field_query + " = " + str(key)
+            arcpy.SelectLayerByAttribute_management("polygons_lyr", "ADD_TO_SELECTION", query)
+
+    num_polys = int(arcpy.GetCount_management("polygons_lyr").getOutput(0))
+    print "Number of polygons to be processed: " + str(num_polys)
+
+    print "Saving polygons as new layer......"
+    new_layer = "in_memory\polygons_" + str(year)
+    arcpy.CopyFeatures_management("polygons_lyr", new_layer)
+
+    monthly_data = []
+    for month in months:
+        raster = var + "_" + str(year) + "_" + str(month) + ".tif"
+        print "\t## Processing month " + str(month) + " ##"
+        outTable = outDir + "\\" + raster[0:-4] + ".dbf"
+
+        print "Executing ZonalStatisticsAsTable......"
+        # Execute ZonalStatisticsAsTable
+        ZonalStatisticsAsTable(new_layer, field, os.path.join(in_folder, "baseline", var, str(year), raster), outTable, "DATA", "MEAN")
+
+        outTable2 = outDir + "\\" + raster[0:-4] + ".csv"
+
+        print "Saving Table as CSV......"
+        # Execute TableToTable
+        arcpy.TableToTable_conversion(outTable, outDir, raster[0:-4] + ".csv")
+
+        print "Reading CSV file......\n"
+        if month == 1:
+            with open(outTable2) as csvfile:
+                readCSV = csv.reader(csvfile, delimiter=',')
+                next(readCSV)  # Skip header row
+                monthly_data = [[int(line[1]), float(line[4])] for line in readCSV]  # Header not included
+        else:
+            with open(outTable2) as csvfile:
+                readCSV = csv.reader(csvfile, delimiter=',')
+                next(readCSV)  # Skip header row
+                data2 = [line[4] for line in readCSV]  # Header not included
+
+            for i in range(0, len(monthly_data)):
+                monthly_data[i] = monthly_data[i] + [float(data2[i])]
+
+    if year == uniqueYears[0]:
+        final_data = monthly_data
+    else:
+        final_data.extend(monthly_data)
+
+
+vars = [var + "_month_" + str(x) for x in months]
+header = [field] + vars
+print "Writing final CSV file......"
+with open(os.path.join(out_folder, scenario, out_file), 'wb') as f:
+    w = csv.writer(f, quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+    w.writerow(header)
+    w.writerows(final_data)
+
+
+arcpy.CheckInExtension("Spatial")
+
+print "\nDONE!!!"
