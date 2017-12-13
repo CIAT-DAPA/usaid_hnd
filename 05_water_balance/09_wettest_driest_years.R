@@ -17,8 +17,8 @@ yi <- "2000"
 yf <- "2014"
 years = yi:yf
 months = 1:12
-new_columns =  c("HydroID", "Ano", paste0("caudal_", months), paste0("caudal_agar_", months))
-prec_newcols =  c("HydroID", "Ano", paste0("prec_", months))
+new_columns =  c("HydroID", "Ano", paste0("caudal_mes", months), paste0("caudal_agar_mes", months))
+prec_newcols =  c("HydroID", "Ano", paste0("prec_mes", months))
 
 # Create annual prec by row (microwatershed)
 for (year in years){
