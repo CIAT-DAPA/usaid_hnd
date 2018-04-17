@@ -18,8 +18,7 @@ library(reshape)
 var <- "tmin"
 # readCOPECO(iDir, xlsF, oDir, var)
 
-readCOPECO <- function(iDir="", xlsF="", oDir="", var){
-  
+
   if (var == "prec"){
     
     iDir <- "Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_raw/_primary_files/Precipitacion Diaria"
@@ -180,6 +179,3 @@ readCOPECO <- function(iDir="", xlsF="", oDir="", var){
   } 
   
   
-}
-
-
