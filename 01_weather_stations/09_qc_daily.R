@@ -7,7 +7,7 @@ inDir = "Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed
 outDir = "Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/"
 
 # Define variable
-variable = "tmin"
+variable = "prec"
 
 # Load data base with all raw stations
 data_station_prec = read.csv(paste0(inDir,"prec_daily_raw.csv"),header = T)
@@ -33,7 +33,7 @@ dates=seq(as.Date("1970/1/1"), as.Date("2017/12/31"), "days")
 
 # Define values for quality control
 if(variable=="prec"){
- minim = 0 ;maxim = 600; ric = 18
+ minim = 0 ;maxim = 600; ric = 20
  
 }
 

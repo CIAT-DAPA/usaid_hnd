@@ -9,25 +9,25 @@ library(rgeos)
 library(reshape)
 
 # Define variable
-# variable = "tmax"
- variable = "tmin"
+ variable = "tmax"
+# variable = "tmin"
 # variable = "prec"
 
 
 # Define input and ouput path
-inDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_processed/"
-outDir = paste0("X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_processed/quality_control/",variable,"/")
+inDir = "Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/"
+outDir = paste0("Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/quality_control/",variable,"/")
 
 
 # Load data base with all raw stations catalog with lat and long
 data_station.ini = read.csv(paste0(inDir,variable,"_daily_qc.csv"),header = T)
 
-catalog = read.csv("X:/Water_Planning_System/01_weather_stations/catalog_daily.csv",header = T)
-catalog = catalog[which(catalog$variable==variable),]
-catalog = catalog[which(catalog$operator=="ENEE"),]
+catalog = read.csv("Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_raw/_primary_files/coordenadas.csv",header = T)
+if(variable=="tmin" | variable=="tmax") catalog = catalog[which(catalog$tmax=="si"),]
+#catalog = catalog[which(catalog$operator=="ENEE"),]
 
 # Define period from data
-dates=seq(as.Date("1990/1/1"), as.Date("2016/12/31"), "days") 
+dates=seq(as.Date("1970/1/1"), as.Date("2017/12/31"), "days") 
 
 data_station = data_station.ini[which(data_station.ini$year %in% as.numeric(unique(format(dates,"%Y")))),]
 
@@ -41,8 +41,8 @@ summary_st = cbind(apply(data_station[,-1:-3],2,min,na.rm=T),apply(data_station[
 summary_st = as.data.frame(cbind(nomb_s, summary_st))
 names(summary_st) = c("cod","name_st","min","max","datos_faltantes")
 #pos = which(as.character(summary_st$cod) %in% as.character(catalog$national_code))
-summary_st$lat =catalog$latitudeDD
-summary_st$long =catalog$longitudeDD
+summary_st$lat =catalog$Lat
+  summary_st$long =catalog$Lon
 
 rownames(summary_st) = NULL
 write.csv(summary_st,paste0(outDir,"summary_all_st_",variable,"_qc.csv"),row.names = F,quote = F)
@@ -80,8 +80,8 @@ map_na = function(summary_st,years,variable,outDir,shape_dir){
   p <- p + scale_fill_manual(values=c("grey 80","grey 80"))
   p <- p + geom_path(aes(long,lat,group=group,fill=hole),color="white",size=0.3)
   
-  p <- p + geom_point(data=summary_st, aes(x=long, y=lat, map_id=name_st,col=datos_faltantes),size=3)+
-    geom_point(data=summary_st,aes(x=long, y=lat),shape = 1,size = 3,colour = "black")
+  p <- p + geom_point(data=summary_st, aes(x=long, y=lat,col=datos_faltantes),size=3)+
+    geom_point(data=summary_st,aes(x=long, y=lat),shape = 1,size = 3,colour = "black") 
   
   p <- p +scale_color_gradient2(name=name, low = low, mid = mid, high = high,
                                 limits=c(uplimit,dwlimit), guide="colourbar",
@@ -103,7 +103,7 @@ map_na = function(summary_st,years,variable,outDir,shape_dir){
   dev.off()
 }
 
-shape_dir = "X:/Water_Planning_System/03_geodata/HND_adm/HND_adm1.shp"
+shape_dir = "Z:/Water_Planning_System/03_geodata/HND_adm/HND_adm1.shp"
 years = paste0(min(unique(format(dates,"%Y"))),"-",max(unique(format(dates,"%Y"))))
 
 map_na(summary_st,years,variable,outDir,shape_dir)
