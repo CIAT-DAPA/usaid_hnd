@@ -9,14 +9,14 @@ library(rgeos)
 library(reshape)
 
 # Define variable
- variable = "tmax"
-# variable = "tmin"
+# variable = "tmax"
+ variable = "tmin"
 # variable = "prec"
 
 
 # Define input and ouput path
-inDir = "Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/"
-outDir = paste0("Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/quality_control/",variable,"/")
+inDir = "Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/1981-2010/"
+outDir = paste0("Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/1981-2010/quality_control/",variable,"/")
 
 
 # Load data base with all raw stations catalog with lat and long
@@ -27,7 +27,7 @@ if(variable=="tmin" | variable=="tmax") catalog = catalog[which(catalog$tmax=="s
 #catalog = catalog[which(catalog$operator=="ENEE"),]
 
 # Define period from data
-dates=seq(as.Date("1970/1/1"), as.Date("2017/12/31"), "days") 
+dates=seq(as.Date("1981/1/1"), as.Date("2017/12/31"), "days") 
 
 data_station = data_station.ini[which(data_station.ini$year %in% as.numeric(unique(format(dates,"%Y")))),]
 
