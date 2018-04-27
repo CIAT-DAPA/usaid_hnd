@@ -32,8 +32,8 @@ sum22=function(a,na.rm=T){
 # precip=read.table("clipboard",header = T)
 # tmax=read.table("clipboard",header = T)
 # tmin=read.table("clipboard",header = T)
-inDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh_noaa/daily_processed/gap_filling/"
-outDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh_noaa"
+inDir = "Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/1981-2010/"
+outDir = "Z:/Water_Planning_System/01_weather_stations/hnd_copeco"
 
 tmax = read.csv(paste0(inDir,"data_genTmax.csv"),header = T)
 tmin = read.csv(paste0(inDir,"data_genTmin.csv"),header = T)

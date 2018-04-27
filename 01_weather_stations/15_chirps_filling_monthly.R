@@ -1,9 +1,9 @@
 library(raster)
 require(ncdf4)
 #chirps = raster(x = "D:/Tobackup/CIAT/Projects/USAID/Data_clima/data_filling/stack_chirps.grd")
-chirps_all = stack("C:\\Users\\lllanos\\Downloads\\data.nc")
+chirps_all = stack("C:\\Users\\lllanos\\Downloads\\data_hnd.nc")
 
-setwd("X:/Water_Planning_System/01_weather_stations/hnd_enee/monthly_processed/prec")
+setwd("Z:/Water_Planning_System/01_weather_stations/hnd_copeco/monthly_processed/prec")
 dpto="chirps"
 dir.create(dpto)
     
@@ -15,13 +15,13 @@ station_chirps.b = raster::extract(x=chirps_all, y=station_coord[,-1], method = 
 station_chirps.b = as.data.frame(t(station_chirps.b))[1:nrow(station_data),]
 names(station_chirps.b)=names(station_data)[-2:-1]
 
-dates=seq(as.Date("1981/01/01"),as.Date("2016/12/31"),"month")
+dates=seq(as.Date("1981/01/01"),as.Date("2017/12/31"),"month")
 months=months.Date(dates)
 names_st=names(station_chirps.b)
 
 #dir.create(paste0(dpto,"/all"))
 #dir.create(paste0(dpto,"/monthly"))
-setwd(paste0("X:/Water_Planning_System/01_weather_stations/hnd_enee/monthly_processed/prec/",dpto))
+setwd(paste0("Z:/Water_Planning_System/01_weather_stations/hnd_copeco/monthly_processed/prec/",dpto))
 
 add_legend <- function(...) {
        opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
