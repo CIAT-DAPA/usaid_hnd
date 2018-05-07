@@ -6,21 +6,15 @@
 ## Needs java x-64 (if R is 64bits) https://www.java.com/en/download/manual.jsp 
 Sys.setenv(JAVA_HOME='C:/Program Files/Java/jre1.8.0_121')
 
-
-###### Convert meters to lat lon using projection for HND
-
-iDir <- "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_raw/_primary_files"
-xlsF_all <- list.files(iDir, ".xls")
-oDir <- "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_raw/prec-per-station"
+ library(XLConnect)
+ library(reshape)
 
 
-readDGRH <- function(iDir="", xlsF="", oDir=""){
+readDGRH <- function(iDir="", xlsF="", oDir="", var){
   
   # Set libraries
   # if(!require(XLConnect)){install.packages("XLConnect")}
-  library(XLConnect)
-  library(reshape)
-  
+   
   # Open xls file 
  
   #nsheets <- length(getSheets(xlsF))
@@ -63,8 +57,8 @@ readDGRH <- function(iDir="", xlsF="", oDir=""){
       
       st_lat <- irow[grep("lat", tolower(irow))+1]
      # st_lat <- as.numeric(substr(st_lat[[1]][1], nchar(st_lat[[1]][1])-1, nchar(st_lat[[1]][1]))) + as.numeric(st_lat[[1]][2])/60 + as.numeric(st_lat[[1]][2])/3600
-      st_lon <- irow[grep("lat", tolower(irow))+1]
-    #  st_lon <- as.numeric(substr(st_lon[[1]][1], nchar(st_lon[[1]][1])-1, nchar(st_lon[[1]][1]))) + as.numeric(st_lon[[1]][2])/60 + as.numeric(st_lon[[1]][2])/3600
+      st_lon <- irow[grep("long", tolower(irow))+1]
+     # st_lon <- as.numeric(substr(st_lon[[1]][1], nchar(st_lon[[1]][1])-1, nchar(st_lon[[1]][1]))) + as.numeric(st_lon[[1]][2])/60 + as.numeric(st_lon[[1]][2])/3600
       
       st_cod <- irow[grep("codigo", tolower(irow))+1]
       st_elv <- irow[grep("elev", tolower(irow))+1]
@@ -80,16 +74,16 @@ readDGRH <- function(iDir="", xlsF="", oDir=""){
     # st_wth <- irow[1]
     
     # if(which(sapply(lapply(strsplit(xlsF_s[,1], " "), function(ch) grep("precipitacion", tolower(ch))), function(x) length(x) > 0), arr.ind = TRUE) > 0) {
-       var <- "prec"
+      
     # } 
     
-    # oDirVar <- paste0(oDir, "/monthly-raw/", var, "-per-station")
-    # if(!file.exists(oDirVar)){
-    #   dir.create(oDirVar, recursive = T)
-    # }
-    
+    oDirVar <- paste0(oDir,"/", var, "-per-station")
+    if(!file.exists(oDirVar)){
+      dir.create(oDirVar, recursive = T)
+    }
+
     cat(" - write whtst output file \n")
-    write.table(data, paste0(oDir, "/", if(!is.na(as.numeric(st_cod))){as.numeric(st_cod)}else{st_name}, "_raw_", var, ".txt"), quote = F, row.names = F)
+    write.table(data, paste0(oDirVar, "/", if(!is.na(as.numeric(st_cod))){as.numeric(st_cod)}else{st_name}, "_raw_", var, ".txt"), quote = F, row.names = F)
     
     st_catalog <- rbind(st_catalog, cbind(st_name, as.numeric(st_cod), var, st_lat, st_lon, st_elv, paste(data[1,1]), paste(data[nrow(data),1])))
     rm(irow)
@@ -98,33 +92,34 @@ readDGRH <- function(iDir="", xlsF="", oDir=""){
   
   cat(".> Write catalog file \n")
   colnames(st_catalog) <- c("station", "code", "variable", "latitude", "longitude", "elevation", "start_date", "end_date")
-  write.csv(st_catalog, paste0(oDir, "/stations_catalog.csv"), quote = F, row.names = F)
+  write.table(st_catalog, paste0(oDir, "/stations_catalog.csv"), sep = ",", quote = F, row.names = F, append = TRUE, col.names=!file.exists(paste0(oDir, "/stations_catalog.csv")))
   
   
   
 }
 
-### Run function
-readDGRH(iDir, xlsF, oDir)
+### Run function for prec
+iDir <- "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_raw/_primary_files"
+xlsF_all <- list.files(iDir, ".xls")
+oDir <- "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_raw"
+var <- "prec"
+
+readDGRH(iDir, xlsF, oDir, var)
+
+### Run function for tmax
+iDir <- "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_raw/_primary_files/tmax"
+xlsF_all <- list.files(iDir, ".xls")
+oDir <- "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_raw"
+var <- "tmax"
+
+readDGRH(iDir, xlsF, oDir, var)
 
 
-#### Read DGRH weather data - qbasic data ####
+### Run function for tmax
+iDir <- "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_raw/_primary_files/tmin"
+xlsF_all <- list.files(iDir, ".xls")
+oDir <- "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_raw"
+var <- "tmin"
 
-iDir <- "W:/01_weather_stations/hnd_dgrh/monthly_raw/_primary_files/qbasic"
-oDir <- "W:/01_weather_stations/hnd_dgrh/monthly_raw"
+readDGRH(iDir, xlsF, oDir, var)
 
-stLs <- list.files(iDir)
-
-for(st in stLs){
-  st <- stLs[7]
-  if (file.size(paste0(iDir, "/", st)) > 3){
-    data <- readLines(paste0(iDir, "/", st))  
-    
-    irow <- which(sapply(lapply(strsplit(data, ":"), function(ch) grep("ESTACION", tolower(ch))), function(x) length(x) > 0), arr.ind = TRUE)
-    
-  }
-  
-  
-  
-  
-}
