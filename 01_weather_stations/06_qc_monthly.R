@@ -3,26 +3,30 @@
 # March 2017
 
 
-inDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/daily_raw/"
-outDir = "X:/Water_Planning_System/01_weather_stations/hnd_dgrh/"
+inDir = "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_processed/"
+outDir = "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/"
+variable = "prec"
+variable = "tmax"
+variable = "tmin"
 
-dir.create(paste0(outDir,"daily_processed"),showWarnings = F)
-
-data_station=read.csv(paste0(inDir,"precip_daily_all.csv"),header = T)
+dir.create(paste0(outDir,"quality_control"),showWarnings = F)
+dir.create(paste0(outDir,"quality_control/",variable),showWarnings = F)
+data_station=read.csv(paste0(inDir,variable,"_monthly_raw.csv"),header = T)
 nomb=names(data_station[,-1:-2])
 
 apply(data_station,2,summary)
-dates=seq(as.Date("1980/1/1"), as.Date("2015/12/31"), "month") #Definir periodo que se desea analizar
+dates=seq(as.Date("1981/1/1"), as.Date("2017/12/31"), "month") #Definir periodo que se desea analizar
 
 graf_line = function(x,y,title){
-  png(paste0(title,".png"), width = 10, height = 4,units = 'in',res=200)
-  plot(x,y,type="l",xlab="",ylab="Precipitation (mm)",main=title)
+  png(paste0(outDir,"quality_control/",variable,"/",title,".png"), width = 10, height = 4,units = 'in',res=200)
+  plot(x,y,type="l",xlab="",ylab="Temperatura mínima",main=title)
   grid()
   dev.off()
   
 }
 
-lapply(1:(ncol(data_station)-2),function(j) graf_line(dates,data_station[,j],nomb[j]))
+lapply(1:(ncol(data_station)-2),function(j) graf_line(dates,data_station[,j+2],nomb[j]))
+
 
 
 ######
