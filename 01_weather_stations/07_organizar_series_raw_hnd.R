@@ -266,7 +266,7 @@ outDir ="Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/"
 rutCat = "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_raw/stations_catalog.csv"
 dir.create(paste0(outDir,"monthly_processed"),showWarnings = F)
 
-time_period=seq(as.Date("1981/1/1"), as.Date("2017/12/31"), "days")
+time_period=seq(as.Date("1981/1/1"), as.Date("2017/12/31"), "month")
 
 
 for(j in 1:3) organize_data_cop(inDir,outDir,rutCat,variable[j],time_period,inst=NULL)

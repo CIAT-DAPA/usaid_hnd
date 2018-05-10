@@ -3,11 +3,11 @@ require(ncdf4)
 #chirps = raster(x = "D:/Tobackup/CIAT/Projects/USAID/Data_clima/data_filling/stack_chirps.grd")
 chirps_all = stack("C:\\Users\\lllanos\\Downloads\\data_hnd.nc")
 
-setwd("Z:/Water_Planning_System/01_weather_stations/hnd_copeco/monthly_processed/prec")
+setwd("Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_processed")
 dpto="chirps"
 dir.create(dpto)
     
-station_data = read.csv(file = paste0("filter_monthly_prec.csv"),header=T)
+station_data = read.csv(file = paste0("prec_monthly_raw.csv"),header=T)
 station_data = station_data[station_data$year>1980,]
 station_coord = read.csv(file = paste0(dpto,"_catalog.csv"),header=T)
 
@@ -21,7 +21,7 @@ names_st=names(station_chirps.b)
 
 #dir.create(paste0(dpto,"/all"))
 #dir.create(paste0(dpto,"/monthly"))
-setwd(paste0("Z:/Water_Planning_System/01_weather_stations/hnd_copeco/monthly_processed/prec/",dpto))
+setwd(paste0("Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_processed/",dpto))
 
 add_legend <- function(...) {
        opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
