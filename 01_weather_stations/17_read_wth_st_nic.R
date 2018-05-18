@@ -6,6 +6,8 @@ library(RCurl)
 library(XML)
 library(dplyr)
 library(tidyr)
+library(readr)
+options(warn=-1)
 
 htmlToText <- function(input, ...) {
   ###---PACKAGES ---###
@@ -61,12 +63,63 @@ htmlToText <- function(input, ...) {
 }
 
 # Run function to read html files
-files <- "C:/Users/lllanos/Downloads/45005 Quilali 1958.htm"
+
+read_html_nica <- function(files, inDir, outDir, var){
+
+dir.create(paste0(outDir,"/",var))  
 
 html_files <- files %>% htmlToText %>% strsplit(., split = " ") %>% unlist %>% .[.!=""]
 pos_sum <- which(html_files=="Suma")
 
-data_end <- matrix(html_files[(pos_sum[1]+1):(pos_sum[2]-1)],31,14, byrow = T, dimnames = list(1:31,c("day",month.abb,"sume"))) %>% 
-            as.data.frame(.) %>% .[,-ncol(.)] %>%  gather(key = month, value = value,-day)
+if(length(pos_sum)>0){
+  
+
+data_end <- matrix(html_files[(pos_sum[1]+1):(pos_sum[2]-1)],31,14, byrow = T, dimnames = list(1:31,c("day",1:12,"sume"))) %>% 
+            as.data.frame(.) %>% .[,-ncol(.)] %>%  gather(key = month, value = Value,-day)
 
 info_cat <- html_files[1:pos_sum[1]]
+year <- info_cat[grep("Año:", info_cat)+1]
+
+data_end$Date <- paste(year,sprintf("%02d",as.numeric(data_end$month)), sprintf("%02d", as.numeric(as.character(data_end$day))),sep = "-") %>% as.Date() %>% 
+                 format(., "%Y%m%d")
+
+data_end$Value <- as.numeric(data_end$Value)
+data_end <- data_end[!is.na(data_end$Date),c(4,3)]
+
+
+# date <- data.frame(date=seq(as.Date(paste0(year,"-01-01")),as.Date(paste0(year,"-12-31")),"days"))
+# data_end <- data_end %>% right_join(,by = "date")
+
+st_name <- info_cat[grep("Estación:", info_cat)+2]
+
+st_lat <- info_cat[grep("Latitud", info_cat)+1:4] %>% extract_numeric
+st_lat <- st_lat[1]+ st_lat[2]/60 + st_lat[3]/3600
+
+st_lon <- info_cat[grep("Longitud", info_cat)+1:4] %>% extract_numeric
+st_lon <-  (st_lon[1]+ st_lon[2]/60 + st_lon[3]/3600)*-1
+
+st_cod <- info_cat[grep("Código:", info_cat)+1:2] %>% paste(., collapse = "")
+st_elv <- info_cat[grep("Elevación:", info_cat)+1]
+
+st_catalog <- cbind(st_name, as.numeric(st_cod), var, st_lat, st_lon, st_elv, paste(data_end[1,1]), paste(data_end[nrow(data_end),1]))
+colnames(st_catalog) <- c("station", "code", "variable", "latitude", "longitude", "elevation", "start_date", "end_date")
+
+
+cat(paste(" - write whtst output file", st_cod, st_name, year," \n"))
+# if(!file.exists(paste0(oDirVar, "/", st_cod, "_raw_", var, ".txt")))
+write.table(data_end, paste0(outDir, "/",var,"/", st_cod, "_raw_", var, ".txt"), quote = F, row.names = F,append = TRUE, col.names=!file.exists(paste0(outDir,"/",var, "/", st_cod, "_raw_", var, ".txt")))
+write.table(st_catalog, paste0(outDir, "/stations_catalog.csv"), sep = ",", quote = F, row.names = F, append = TRUE, col.names=!file.exists(paste0(outDir, "/stations_catalog.csv")))
+}
+
+}
+
+inDir <- "Z:/Water_Planning_System/01_weather_stations/nic_ineter/_primary_files/Precipitacion"
+files_all <- list.files(inDir,full.names = T) %>% list.files(.,pattern = ".htm",full.names = T)
+pos_month <- which(gsub("[^0-9]+", "",as.character(basename(files_all))) %>% nchar(.)>11)
+pos_yearly <- which(grepl("anual" , tolower(as.character(basename(files_all))))==TRUE)
+
+files_all <- files_all[-c(pos_month, pos_yearly)]
+outDir <- "Z:/Water_Planning_System/01_weather_stations/nic_ineter/daily_raw"
+var <- "prec"
+
+lapply(1:length(files_all),function(i) {print(i); read_html_nica(files_all[i], inDir, outDir, var)})
