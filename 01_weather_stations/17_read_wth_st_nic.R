@@ -107,7 +107,7 @@ colnames(st_catalog) <- c("station", "code", "variable", "latitude", "longitude"
 
 cat(paste(" - write whtst output file", st_cod, st_name, year," \n"))
 # if(!file.exists(paste0(oDirVar, "/", st_cod, "_raw_", var, ".txt")))
-write.table(data_end, paste0(outDir, "/",var,"/", st_cod, "_raw_", var, ".txt"), quote = F, row.names = F,append = TRUE, col.names=!file.exists(paste0(outDir,"/",var, "/", st_cod, "_raw_", var, ".txt")))
+write.table(data_end, paste0(outDir, "/",var,"-per-station/", st_cod, "_raw_", var, ".txt"), quote = F, row.names = F,append = TRUE, col.names=!file.exists(paste0(outDir,"/",var, "/", st_cod, "_raw_", var, ".txt")))
 write.table(st_catalog, paste0(outDir, "/stations_catalog.csv"), sep = ",", quote = F, row.names = F, append = TRUE, col.names=!file.exists(paste0(outDir, "/stations_catalog.csv")))
 }
 
