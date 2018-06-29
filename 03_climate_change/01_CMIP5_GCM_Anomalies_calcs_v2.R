@@ -284,7 +284,7 @@ GCMAverageFut <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly", 
           }
         }
         
-        
+
       }
     }
     
@@ -299,14 +299,14 @@ GCMAverageFut <- function(rcp='historical', baseDir="T:/gcm/cmip5/raw/monthly", 
 # Description: This function is to calculate the anomalies of averaged surfaces of the CMIP5 monhtly climate data
 #################################################################################################################
 
-GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990", oDir="D:/CIAT/ecu-hidroelectrica/03_future_climate_data/anomalies_cmip5", bbox="//nina/cenavarro/ecu-hidroelectrica/02_baseline/_region/alt-prj-ecu.asc.asc") {
+GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r1i1p1", basePer="1961_1990", oDir="D:/CIAT/ecu-hidroelectrica/03_future_climate_data/anomalies_cmip5", bbox="//nina/cenavarro/ecu-hidroelectrica/02_baseline/_region/alt-prj-ecu.asc.asc", mask="D:/cenavarro/pnud_hnd/region/hnd_msk.nc") {
   
   require(maptools)
   require(raster)
   require(rgdal)
   require(sp)
   require(ncdf4)
-  
+    
   cat(" \n")
   cat("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n")
   cat("XXXXXXXXX GCM ANOMALIES CALCULATION XXXXXXXX \n")
@@ -322,8 +322,12 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
   
   extbbox <- extent(raster(bbox))
   
-  gcmList <- list.dirs(curDir, recursive = FALSE, full.names = FALSE)
+  # gcmList <- list.dirs(curDir, recursive = FALSE, full.names = FALSE)
   
+  gcmList <- c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "fio_esm", 
+    "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "giss_e2_r", "ipsl_cm5a_lr", 
+    "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", 
+    "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m", "nimr_hadgem2_ao")
   #   dataMatrix <- c("gcm", "period", "var_mth", "value_st_1")
   
   for (gcm in gcmList) {
@@ -331,15 +335,7 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
     # Get gcm names    
     gcm <- basename(gcm)
     
-    
-    #     if (gcm %in% c("bcc_csm1_1", "bcc_csm1_1_m", "cesm1_cam5", "csiro_mk3_6_0", "fio_esm", 
-    #                    "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "giss_e2_r", "ipsl_cm5a_lr", 
-    #                    "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", 
-    #                    "mri_cgcm3", "ncar_ccsm4", "ncc_noresm1_m", "nimr_hadgem2_ao")) {
-    
-    if (gcm %in% c("giss_e2_r", "nimr_hadgem2_ao")) {
-      
-      if (gcm != "lasg_fgoals_g2" && gcm != "gfdl_esm2g" && gcm != "gfdl_esm2m"){ # Cells are not equally spaced
+      if (gcm %in% c("gfdl_esm2g", "gfdl_esm2m")) { # Cells are not equally spaced
         
         # Path of each ensemble
         curEnsDir <- paste(curDir, "/", gcm, "/", ens, sep="")
@@ -347,13 +343,13 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
         # Average directory
         curAvgDir <- paste(curEnsDir, "/average/", basePer, "_", rcp, sep="")
         
-        periodList <- c("2016", "2026", "2036", "2046")
+        periodList <- c("2020", "2040", "2070")
         
         for (period in periodList) {
           
           # Define start and end year
           staYear <- as.integer(period)
-          endYear <- as.integer(period) + 19
+          endYear <- as.integer(period) + 29
           
           futAvgDir <- paste(futDir, "/", gcm, "/", ens, "/average/", staYear, "_", endYear, sep="")
           
@@ -376,77 +372,82 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
                 
               } else if (basePer == "1981_2010") {
                 
-                #               anomDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1995s", sep="")
-                #               anomPerDir <- paste(futDir, "/", gcm, "/", ens, "/anomalies_1995s/", staYear, "_", endYear, sep="")
-                oDirPer <- paste(oDir, "_raw/", rcp, "/", gcm, "/", staYear, "_", endYear, sep="")
-                oDirPerRes <- paste(oDir, "_2_5min/", rcp, "/", gcm, "/", staYear, "_", endYear, sep="")
+                oDirPer <- paste(oDir, "/", rcp, "/", gcm, "/", staYear, "_", endYear, sep="")
+                
               } else {
                 oDirPer <- paste(oDir, "_raw/", rcp, "/", gcm, "/", staYear, "_", endYear, sep="")
                 oDirPerRes <- paste(oDir, "_res/", rcp, "/", gcm, "/", staYear, "_", endYear, sep="")
                 
               }
               
-              
-              #           if (!file.exists(anomDir)) {dir.create(anomDir)}
-              #           if (!file.exists(anomPerDir)) {dir.create(anomPerDir)}
+
               if (!file.exists(oDirPer)) {dir.create(oDirPer, recursive=T)}
-              if (!file.exists(oDirPerRes)) {dir.create(oDirPerRes, recursive=T)}
-              
+
               # Loop around variables
               for (var in varList) {
                 
                 # Loop around months
-                #                 for (mth in monthList) {
-                
-                
-                outNc <- paste(oDirPerRes, "/", var, "_tmp.nc", sep="")
-                if (!file.exists(outNc)) {
+#                 for (mth in monthList) {
                   
-                  curAvgNc <- stack(paste(curAvgDir, "/", var, "_", monthList, ".nc", sep=""))
-                  futAvgNc <- stack(paste(futAvgDir, "/", var, "_", monthList, ".nc", sep=""))
-                  
-                  if (var == "prec" || var == "rsds"){
-                    anomNc <- (futAvgNc - curAvgNc) / (curAvgNc + 0.5)
-                  } else {
-                    anomNc <- futAvgNc - curAvgNc  
+                  outNc <- paste(oDirPer, "/", var, "_tmp.nc", sep="")
+                  if (!file.exists(outNc)) {
+                    
+                    curAvgNc <- stack(paste(curAvgDir, "/", var, "_", monthList, ".nc", sep=""))
+                    futAvgNc <- stack(paste(futAvgDir, "/", var, "_", monthList, ".nc", sep=""))
+                    
+                    if (extent(curAvgNc) != extent(curAvgNc)) {
+                      futAvgNc <- resample(futAvgNc, curAvgNc)
+                    }
+                    
+                    if (var == "prec" || var == "rsds"){
+                      anomNc <- (futAvgNc - curAvgNc) / (curAvgNc + 0.5)
+                    } else {
+                      anomNc <- futAvgNc - curAvgNc  
+                    }
+                    
+                    anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=FALSE)
                   }
                   
-                  anomNc <- writeRaster(anomNc, outNc, format='CDF', overwrite=FALSE)
-                }
-                
-                
-                outNcRes <- paste(oDirPerRes, "/", var, ".nc", sep="")
-                if (!file.exists(outNcRes)) {
                   
-                  system(paste("cdo sellonlatbox,",extbbox@xmin-3,",",extbbox@xmax+3,",",extbbox@ymin-3,",",extbbox@ymax+3," ", outNc, " ", oDirPer, "/", var, ".nc", sep=""))
-                  unlink(outNc, recursive = TRUE)
+                  outNcCut <- paste(oDirPer, "/", var, ".nc", sep="")
+                  outNcRes <- paste(oDirPer, "/", var, "_res.nc", sep="")
+                  outNcResMsk <- paste(oDirPer, "/", var, "_msk.nc", sep="")
                   
-                  system(paste("cdo remapbil,", bbox, " ", oDirPer, "/", var, ".nc", " ", outNcRes, sep=""))
-                  
-                  #                     anomNc <- stack(paste(oDirPer, "/", var, ".nc", sep=""))
-                  
-                  # resAnomNc  <- resample(anomNc, rs, method='ngb')
-                  # anomNcExt <- setExtent(anomNc, extbbox, keepres=TRUE, snap=FALSE)
-                  #                     resAnomNcExt  <- resample(anomNc, bbox, method='bilinear')
-                  #                     resAnomNcExt <- writeRaster(resAnomNcExt, outNcRes, format='CDF', overwrite=FALSE)
-                  
-                  
-                  
-                }
-                #                 }    
+                  if (!file.exists(outNcRes)) {
+                    
+                    system(paste("D:/cenavarro/pnud_hnd/cdo/cdo.exe sellonlatbox,",extbbox@xmin-3,",",extbbox@xmax+3,",",extbbox@ymin-3,",",extbbox@ymax+3," ", outNc, " ", outNcCut, sep=""))
+                    unlink(outNc, recursive = TRUE)
+                    
+                    system(paste("D:/cenavarro/pnud_hnd/cdo/cdo.exe remapbil,", bbox, " ", outNcCut, " ", outNcRes, sep=""))
+                    unlink(outNcCut, recursive = TRUE)
+                    
+                    anomNc_msk <- mask(stack(outNcRes), raster(mask))
+                    writeRaster(anomNc_msk, outNcResMsk)
+                    unlink(outNcRes, recursive = TRUE)
+                    
+                    file.remove(outNcRes)
+                    # anomNc <- stack(paste(oDirPer, "/", var, ".nc", sep=""))
+                    # resAnomNc  <- resample(anomNc, rs, method='ngb')
+                    # anomNcExt <- setExtent(anomNc, extbbox, keepres=TRUE, snap=FALSE)
+#                     resAnomNcExt  <- resample(anomNc, bbox, method='bilinear')
+#                     resAnomNcExt <- writeRaster(resAnomNcExt, outNcRes, format='CDF', overwrite=FALSE)
+                    
+                    
+                    
+                  }
+#                 }    
               } 
             }  
           }  
         }
+    # }
+    
       }
-    }
-    
-    
   }
   cat("GCM Anomalies Process Done!")
 }
 
-GCMAnomaliesEns <- function(rcp='rcp26', baseDir="Z:/DATA/WP2/03_Future_data/anomalies_2_5min", perList=c("2020_2049", "2040_2069", "2070_2099")) {
+GCMAnomaliesEns <- function(rcp='rcp26', baseDir="Z:/DATA/WP2/03_Future_data/anomalies_2_5min", perList=c("2020_2049", "2040_2069", "2070_2099"), oDir= "D:/cenavarro/pnud_hnd/anomalies_ens") {
   
   require(raster)
   require(ncdf)
@@ -454,37 +455,37 @@ GCMAnomaliesEns <- function(rcp='rcp26', baseDir="Z:/DATA/WP2/03_Future_data/ano
   require(rgdal)
   
   varList <- c("prec", "tmin", "tmax")
-  
+
   # Get a list of GCMs
   gcmList <- list.dirs(paste0(baseDir, "/", rcp), recursive = FALSE, full.names = FALSE)
-  
+
   gcmList <- setdiff(gcmList, "ensemble")
-  
+
   cat("Anomalies Ensemble over: ", rcp, "\n")
-  
+
   for (period in perList) {
-    
-    oDirEns <- paste0(baseDir, "/", rcp, "/ensemble/", period)
+
+    oDirEns <- paste0(oDir, "/", rcp, "/", period)
     if (!file.exists(oDirEns)) {dir.create(oDirEns, recursive=T)}
-    
+
     setwd(paste(baseDir, "/", rcp, sep=""))
-    
+
     for (var in varList){
-      
-      if (!file.exists(paste(oDirEns, "/", var, "_12.tif", sep=""))){
-        
+
+    if (!file.exists(paste(oDirEns, "/", var, "_12.tif", sep=""))){
+
         for (mth in 1:12){
-          
+
           fun <- function(x,y) { raster(x, band=y) }
-          gcmStack <- stack(lapply(paste0(gcmList, "/", period, "/", var, ".nc"), FUN=fun, y=mth))
-          
+          gcmStack <- stack(lapply(paste0(gcmList, "/", period, "/", var, "_msk.nc"), FUN=fun, y=mth))
+
           gcmMean <- mean(gcmStack)
           fun_std <- function(x) { sd(x) }
           gcmStd <- calc(gcmStack, fun_std)
-          
-          #           gcmMean <- trunc(gcmMean)
-          #           gcmStd <- trunc(gcmStd)
-          
+
+#           gcmMean <- trunc(gcmMean)
+#           gcmStd <- trunc(gcmStd)
+
           if (var == "prec"){
             gcmMean <- gcmMean * 100
             gcmStd <- gcmStd * 100
@@ -492,14 +493,14 @@ GCMAnomaliesEns <- function(rcp='rcp26', baseDir="Z:/DATA/WP2/03_Future_data/ano
             gcmMean <- gcmMean 
             gcmStd <- gcmStd 
           }
-          
+
           gcmMean <- writeRaster(gcmMean, paste(oDirEns, "/", var, "_", mth, '.tif',sep=''))
           gcmStd <- writeRaster(gcmStd, paste(oDirEns, "/", var, "_", mth, "_sd.tif", sep=""))
         }
-        
+
       }
     }
-    
+
   }
   
   
@@ -511,7 +512,7 @@ GCMAnomaliesEns <- function(rcp='rcp26', baseDir="Z:/DATA/WP2/03_Future_data/ano
   
   for (period in perList) {
     
-    oDirEns <- paste0(baseDir, "/", rcp, "/ensemble/", period)
+    oDirEns <- paste0(oDir, "/", rcp, "/", period)
     
     for (var in varList){
       
@@ -537,14 +538,14 @@ GCMAnomaliesEns <- function(rcp='rcp26', baseDir="Z:/DATA/WP2/03_Future_data/ano
   }
   
 }
-
+  
 
 ###########
 ## Wrapp ##
 ###########
 
-# rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
-rcp <- "rcp26"
+
+
 source("01-CMIP5_GCM_Anomalies_calcs.R")
 
 rcp='historical'
@@ -552,20 +553,26 @@ rcpf ='rcp26'
 staYear=1981
 endYear=2010
 baseDir="T:/gcm/cmip5/raw/monthly"
-scrDir="C:/_tools/dapa-climate-change/IPCC-CMIP5/data"
-otp <- GCMAverageHist(rcp, rcpf, staYear, endYear, baseDir, scrDir)
-# otp <- GCMAverageFut(rcp, baseDir, scrDir)
+scrDir="D:/_scripts/dapa-climate-change/IPCC-CMIP5/data"
+# otp <- GCMAverageHist(rcp, rcpf, staYear, endYear, baseDir, scrDir)
+otp <- GCMAverageFut(rcp, baseDir, scrDir)
 
-# baseDir="T:/gcm/cmip5/raw/monthly"
-# ens="r1i1p1"
-# basePer <- "1991_2010"
-# oDir="W:/05_downscaling/anomalies"
-# # bbox <- raster(extent(-80, -66, -16, 5), res=0.5/60) 
-# bbox <- "W:/04_interpolation/region/v3/mask.nc"
-# otp <- GCMAnomalies(rcp, baseDir, ens, basePer, oDir, bbox)
+baseDir="T:/gcm/cmip5/raw/monthly"
+ens="r1i1p1"
+basePer <- "1981_2010"
+oDir="D:/cenavarro/pnud_hnd/anomalies"
+# bbox <- raster(extent(-91, -82, 11, 17))
+bbox <- "D:/cenavarro/pnud_hnd/region/hnd_ext.nc"
+mask <- "D:/cenavarro/pnud_hnd/region/hnd_msk.nc"
+rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
+for (rcp in rcpList){
+  otp <- GCMAnomalies(rcp, baseDir, ens, basePer, oDir, bbox, mask)
+}
 
 # rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
-baseDir <- "W:/05_downscaling/anomalies_res"
-perList <- c("2016_2035", "2026_2045", "2036_2055", "2046_2065")
-otp <- GCMAnomaliesEns(rcp, baseDir, perList)   
-
+baseDir <- "D:/cenavarro/pnud_hnd/anomalies"
+perList <- c("2020_2049", "2040_2069", "2070_2099")
+oDir <- "D:/cenavarro/pnud_hnd/anomalies_ens"
+for (rcp in rcpList){
+  otp <- GCMAnomaliesEns(rcp, baseDir, perList)   
+}

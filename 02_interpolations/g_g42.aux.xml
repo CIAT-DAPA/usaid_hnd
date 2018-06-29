@@ -1,8 +1,0 @@
-<PAMDataset>
-  <Metadata>
-    <MDI key="DataType">Generic</MDI>
-  </Metadata>
-  <PAMRasterBand band="1">
-    <NoDataValue>-3.27680000000000E+004</NoDataValue>
-  </PAMRasterBand>
-</PAMDataset>
