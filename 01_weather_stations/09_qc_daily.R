@@ -3,8 +3,8 @@
 # April 2017
 
 # Define input and ouput path
-inDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_raw/test/daily_processed/"
-outDir = "X:/Water_Planning_System/01_weather_stations/hnd_enee/daily_raw/test/daily_processed/"
+inDir = "Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/"
+outDir = "Z:/Water_Planning_System/01_weather_stations/hnd_copeco/daily_processed/"
 
 # Define variable
 variable = "prec"
@@ -28,12 +28,12 @@ nomb_s_tmin = do.call("rbind",strsplit(nomb_tmin,"_"))
 name_st_tmin = paste0(nomb_s_tmin[,2]," (",nomb_s_tmin[,1],")")
 
 # Define period from data
-dates=seq(as.Date("1980/1/1"), as.Date("2015/12/31"), "days") 
+dates=seq(as.Date("1970/1/1"), as.Date("2017/12/31"), "days") 
 
 
 # Define values for quality control
 if(variable=="prec"){
- minim = 0 ;maxim = 300; ric = 15
+ minim = 0 ;maxim = 600; ric = 20
  
 }
 
@@ -43,7 +43,7 @@ if(variable=="tmax"){
 }
 
 if( variable=="tmin"){
-  minim = 5 ;maxim = 35; ric = 7; criterio1=15
+  minim = -1 ;maxim = 35; ric = 7; criterio1=15
   
 }
 # apply(data_station_tmax,2,max,na.rm=T)
