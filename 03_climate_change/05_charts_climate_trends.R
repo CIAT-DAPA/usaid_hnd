@@ -15,19 +15,18 @@ require(rgdal)
 library(grid)
 
 baseDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/03_Interpolacion/average"
-downDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/04_Escenarios/downscaled_ens"
-oDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/04_Escenarios/evaluation/by_regions"
+downDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/04_Escenarios/downscaled_v2_ens"
+oDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/04_Escenarios/evaluation/by_regions_v2"
 
 rcp <- "rcp45"
 perList <- c("2020_2049", "2040_2069", "2070_2099")
 regions <- readOGR("D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/03_Interpolacion/region/Regiones_Desarrollo_prj_v2.shp")
 varLs <- c("prec", "tmean")
 
-mt <- c()
 
-if(!file.exists(paste0(oDir, "/monthly_data_regions.csv"))){
+if(!file.exists(paste0(oDir, "/monthly_data_regions_v2.csv"))){
   
-  
+  mt <- c()
   for (i in 1:length(as.vector(regions$REGION)) ){
     
     for (var in varLs){
@@ -70,7 +69,7 @@ if(!file.exists(paste0(oDir, "/monthly_data_regions.csv"))){
 
 
 
-mthData <- read.csv(paste0(oDir, "/monthly_data_regions.csv"), header = T)
+mthData <- read.csv(paste0(oDir, "/monthly_data_regions_v2.csv"), header = T)
 
 for (i in 1:length(as.vector(regions$REGION)) ){
 
@@ -128,26 +127,26 @@ for (i in 1:length(as.vector(regions$REGION)) ){
   
   if (i == 13 || i == 15){
     barx2 <- barplot(yy, beside=T, axes=F, col=c("lightblue","steelblue1", "steelblue3", "steelblue4"), ylim=c(0,max(yy)+100), axis.lty=1, xlab="", ylab="", 
-                     cex.axis=0.8, names.arg=mth_lb, tcl=-0.3, cex.names=0.8)
+                     cex.axis=1.1, names.arg=mth_lb, tcl=-0.3, cex.names=1.1)
     error.bar(barx2,yy,sdtotal)
-    axis(2, ylim=c(0,max(yy)+100), col="black", lwd=1, cex.axis=0.8)
+    axis(2, ylim=c(0,max(yy)+100), col="black", lwd=1, cex.axis=1.1)
   } else {
     barx2 <- barplot(yy, beside=T, axes=F, col=c("lightblue","steelblue1", "steelblue3", "steelblue4"), ylim=c(0,max(yy)+50), axis.lty=1, xlab="", ylab="", 
-                     cex.axis=0.8, names.arg=mth_lb, tcl=-0.3, cex.names=0.8)
+                     cex.axis=1.1, names.arg=mth_lb, tcl=-0.3, cex.names=1.1)
     error.bar(barx2,yy,sdtotal)
-    axis(2, ylim=c(0,max(yy)+50), col="black", lwd=1, cex.axis=0.8)
+    axis(2, ylim=c(0,max(yy)+50), col="black", lwd=1, cex.axis=1.1)
   }
 
   
   ##Plot current and future temperature  
   par(new=TRUE)  
-  plot(t.means,axes=FALSE,ann=FALSE,type="n",ylim=c(0,round(max(tm.means2080) + 0.5)),ylab="", xlab="", cex.lab=0.8, cex.axis=0.8)
+  plot(t.means,axes=FALSE,ann=FALSE,type="n",ylim=c(0,round(max(tm.means2080) + 0.5)),ylab="", xlab="", cex.lab=1.1, cex.axis=1.1)
   
-  axis(4, tcl=-0.3, cex.axis=0.8, ylim=c(0,round(max(tm.means2080) + 0.5)))
+  axis(4, tcl=-0.3, cex.axis=1.1, ylim=c(0,round(max(tm.means2080) + 0.5)))
   
-  mtext(2, text="Precipitación (mm/mes)", line=2.5) 
-  mtext(4,text="Temperatura (°C)", line=2.5)
-  mtext(1,text="Mes",line=2.5)
+  mtext(2, text="Precipitación (mm/mes)", line=2.5, cex = 1.1) 
+  mtext(4,text="Temperatura (°C)", line=2.5, cex = 1.1)
+  mtext(1,text="Mes",line=2.5, cex = 1.1)
   
   legend_order <- matrix(1:8,ncol=4,byrow = TRUE)
   
@@ -166,7 +165,7 @@ for (i in 1:length(as.vector(regions$REGION)) ){
          lwd=c(NA,NA,NA, NA, 1.5,1.5,1.5,1.5), 
          merge = T, 
          ncol=4, 
-         cex = 0.9
+         cex = 1.1
          )
   
   par(new=TRUE)

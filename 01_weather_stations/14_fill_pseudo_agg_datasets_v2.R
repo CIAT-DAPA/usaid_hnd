@@ -273,7 +273,7 @@ clim_calc <- function(var="prec",  bDir = "Z:/DATA/WP2/01_Weather_Stations/MERGE
 ### 05 - Add Pseudo-stations #####
 ##################################
 
-add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world", bDir ="Z:/DATA/WP2/01_Weather_Stations/MERGE/climatology", rDir ="Z:/DATA/WP2/00_zones", oDir="", dst_name ="chrips", sY =1981, fY =2010, var ="prec"){
+add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world", bDir ="Z:/DATA/WP2/01_Weather_Stations/MERGE/climatology", rDir ="Z:/DATA/WP2/00_zones", oDir="", dst_name ="chrips", sY =1981, fY =2010, var ="prec", srtm){
   
   require(raster)
   require(rgdal)
@@ -282,7 +282,7 @@ add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world"
   library(sp)
   library(KernSmooth)
   
-  wDir = "D:/cenavarro/Workspace"
+  wDir = "D:/Workspace"
   if (!file.exists(wDir)) {dir.create(wDir, recursive = TRUE)}
   rasterOptions(tmpdir= wDir)
   
@@ -310,7 +310,7 @@ add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world"
   coordinates(points) <- ~LONG+LAT
   
   est <- bkde2D(coordinates(points), 
-                bandwidth=c(1,1), 
+                bandwidth=c(0.5,0.5), 
                 gridsize=c(nrow(mask),ncol(mask)),
                 range.x=list(c(xmin(refExt),xmax(refExt)),c(ymin(refExt),ymax(refExt))))
   #   est$fhat[est$fhat<0.00001] <- 0 ## ignore very small values
@@ -377,7 +377,7 @@ add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world"
   denPres <- nrow(raw_data)/length(rs_agg[[1]][!is.na(rs_agg[[1]])])
   
   if (var == "prec"){
-    npts <- 0.3 * length(rs_agg[[1]][!is.na(rs_agg[[1]])]) * denPres#     
+    npts <- 0.5 * length(rs_agg[[1]][!is.na(rs_agg[[1]])]) * denPres#     
   } else {
     npts <- 0.4 * length(rs_agg[[1]][!is.na(rs_agg[[1]])]) * denPres#     
   }
@@ -407,7 +407,7 @@ add_pseudost =function(dDir ="S:/observed/gridded_products/chirps/monthly/world"
   combClimData <- na.omit(rbind(raw_data, climData))
   
   if(var == "prec"){
-    write.csv(combClimData,  paste0(oDir, "/rain_", sY, "_", fY, ".csv"), row.names = F)  
+    write.csv(combClimData,  paste0(oDir, "/rain_", sY, "_", fY, "_v2.csv"), row.names = F)  
   } else {
     write.csv(combClimData,  paste0(oDir, "/", var, "_", sY, "_", fY, ".csv"), row.names = F)
   }
@@ -460,12 +460,12 @@ sY <- 1981
 fY <- 2010
 # varList <- c("prec", "tmax", "tmin")
 
-var <- "tmin"
-# dDir <- "S:/observed/gridded_products/chirps/monthly/world"
-# dst_name <- "CHIRPS"
+var <- "prec"
+dDir <- "S:/observed/gridded_products/chirps/monthly/world"
+dst_name <- "CHIRPS"
 # dDir <- "U:/cropdata/agmerra/monthly"
 # dst_name <- "AGMERRA"
-dDir = "S:/observed/gridded_products/terra-climate"
-dst_name = "terraclimate"
+# dDir = "S:/observed/gridded_products/terra-climate"
+# dst_name = "terraclimate"
 
-add_pseudost(dDir, bDir, rDir, oDir, dst_name, sY, fY, var)
+add_pseudost(dDir, bDir, rDir, oDir, dst_name, sY, fY, var, srtm)

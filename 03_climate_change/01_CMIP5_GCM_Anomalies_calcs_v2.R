@@ -450,17 +450,21 @@ GCMAnomalies <- function(rcp='rcp26', baseDir="T:/gcm/cmip5/raw/monthly", ens="r
 GCMAnomaliesEns <- function(rcp='rcp26', baseDir="Z:/DATA/WP2/03_Future_data/anomalies_2_5min", perList=c("2020_2049", "2040_2069", "2070_2099"), oDir= "D:/cenavarro/pnud_hnd/anomalies_ens") {
   
   require(raster)
-  require(ncdf)
+  require(ncdf4)
   require(maptools)
   require(rgdal)
   
-  varList <- c("prec", "tmin", "tmax")
+  # varList <- c("prec", "tmin", "tmax")
+  varList <- c("rsds", "wsmean")
 
   # Get a list of GCMs
-  gcmList <- list.dirs(paste0(baseDir, "/", rcp), recursive = FALSE, full.names = FALSE)
-
+    gcmList <- c("csiro_mk3_6_0", "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "giss_e2_r", "ipsl_cm5a_lr",
+      "miroc_esm", "miroc_esm_chem", "miroc_miroc5", "mohc_hadgem2_es", "mri_cgcm3", "nimr_hadgem2_ao")
+  
+    # gcmList <- list.dirs(paste0(baseDir, "/", rcp), recursive = FALSE, full.names = FALSE)
+  
   gcmList <- setdiff(gcmList, "ensemble")
-
+  
   cat("Anomalies Ensemble over: ", rcp, "\n")
 
   for (period in perList) {
@@ -476,9 +480,13 @@ GCMAnomaliesEns <- function(rcp='rcp26', baseDir="Z:/DATA/WP2/03_Future_data/ano
 
         for (mth in 1:12){
 
+          cat(mth, var, period, "\n")
+          
           fun <- function(x,y) { raster(x, band=y) }
-          gcmStack <- stack(lapply(paste0(gcmList, "/", period, "/", var, "_msk.nc"), FUN=fun, y=mth))
+          gcmStack <- stack(lapply(paste0(gcmList, "/", period, "/", var, "_res.nc"), FUN=fun, y=mth))
 
+          # gcmStack <- mask(gcmStack, raster(mask) )
+          
           gcmMean <- mean(gcmStack)
           fun_std <- function(x) { sd(x) }
           gcmStd <- calc(gcmStack, fun_std)
@@ -569,10 +577,13 @@ for (rcp in rcpList){
   otp <- GCMAnomalies(rcp, baseDir, ens, basePer, oDir, bbox, mask)
 }
 
-# rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
-baseDir <- "D:/cenavarro/pnud_hnd/anomalies"
+rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
+baseDir <- "D:/cenavarro/hnd_pnud/downscaling/anomalies_v2"
 perList <- c("2020_2049", "2040_2069", "2070_2099")
-oDir <- "D:/cenavarro/pnud_hnd/anomalies_ens"
-for (rcp in rcpList){
-  otp <- GCMAnomaliesEns(rcp, baseDir, perList)   
-}
+oDir <- "D:/cenavarro/hnd_pnud/downscaling/anomalies_ens_v2"
+# mask <- "D:/cenavarro/hnd_pnud/region/hnd_msk.nc"
+rcp <- 'rcp45'
+# for (rcp in rcpList){
+  otp <- GCMAnomaliesEns(rcp, baseDir, perList, oDir)
+# }
+
