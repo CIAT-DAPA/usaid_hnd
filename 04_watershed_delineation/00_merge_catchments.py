@@ -1,4 +1,5 @@
-## Script to merge catchments (with areas less than 100 ha) to their downstream catchments without affecting the net connectivity. These catchments were created with ArcHydro Tools.
+## Script to merge catchments (with areas less than a threshold defined in square meters) to their downstream catchments without affecting the net connectivity.
+## These catchments were created with ArcHydro Tools. Remember to having  run the tool "Adjoint Catchment Processing" before executing this script
 ## Author:  Jefferson Valencia Gomez
 ## E-mail: jefferson.valencia.gomez@gmail.com
 
@@ -18,6 +19,9 @@ ws = raw_input("Enter workspace (*.gdb): ")
 
 # Catchment polygons feature class stored on a database, no shapefile allowed
 layer = raw_input("Enter layer name (no shapefile allowed): ")
+
+# Threshold that defines the minimum area allowed for the catchments
+threshold = raw_input("Enter the threshold area (m2): ")
 
 # Output name
 out_name = raw_input("Enter name of the output layer: ")
@@ -40,7 +44,7 @@ del polyrows
 # Fields to be used into the main functions
 fields = ['HydroID', 'NextDownID', 'SHAPE@']
 # Change the value below depending on the minimum catchment area to preserve. Default is 100 ha = 1000000 m2
-where1 = '"' + 'Shape_Area' + '" < 1000000'
+where1 = '"' + 'Shape_Area' + '" < ' + threshold
 
 # Loop through catchments that will be dissolved
 should_restart = True
