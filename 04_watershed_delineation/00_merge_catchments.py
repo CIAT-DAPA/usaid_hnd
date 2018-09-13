@@ -75,15 +75,20 @@ while should_restart:
 				# Query to get upstream catchments of the current one
 				where2 = '"' + fields[1] + '" = ' + str(grd1)
 				
-				# Change the NextDownID of the upstream catchments of the current one in order to drain to the catchment with HydroID = grd2
-				polyrows1 = arcpy.UpdateCursor(inpgs, where2)	
-				print "\tChanging the NextDownID values of the upstream catchments to be the HydroID (" + str(grd2) + ") of the downstream catchment"				
-				for ucat in polyrows1:
-					print "\t\tChanging the NextDownID (" + str(ucat.getValue(fields[1])) + ") value of the upstream catchment (HydroID: " + str(ucat.getValue(fields[0])) + ") by " + str(grd2)
-					ucat.setValue(fields[1], grd2)
-					polyrows1.updateRow(ucat)
-				del ucat
-				del polyrows1
+				# Make a feature layer just to know if the query returns a record
+				arcpy.MakeFeatureLayer_management(inpgs, 'just_a_test', where2)
+
+				if int(arcpy.GetCount_management('just_a_test').getOutput(0)) > 0:
+					# Change the NextDownID of the upstream catchments of the current one in order to drain to the catchment with HydroID = grd2
+					polyrows1 = arcpy.UpdateCursor(inpgs, where2)
+					print "\tChanging the NextDownID values of the upstream catchments to be the HydroID (" + str(grd2) + ") of the downstream catchment"
+					for ucat in polyrows1:
+						print "\t\tChanging the NextDownID (" + str(ucat.getValue(fields[1])) + ") value of the upstream catchment (HydroID: " + str(ucat.getValue(fields[0])) + ") by " + str(grd2)
+						ucat.setValue(fields[1], grd2)
+						polyrows1.updateRow(ucat)
+					del ucat
+					del polyrows1
+				arcpy.Delete_management('just_a_test')
 				
 				# Query to get the current catchment 
 				where3 = '"' + fields[0] + '" = ' + str(grd1)
@@ -104,11 +109,11 @@ while should_restart:
 				# Change the geometry of the polygon of the downstream catchment
 				polyrows3 = arcpy.UpdateCursor(inpgs, where4)
 				for dcat in polyrows3:
-					print "\tReplacing the geometry of the downstream catchment (HydroID: " + str(grd2) + ") with the merged geometries\n"			
+					print "\tReplacing the geometry of the downstream catchment (HydroID: " + str(grd2) + ") with the merged geometries\n"
 					dcat.Shape = geometries
-					polyrows3.updateRow(dcat)					
+					polyrows3.updateRow(dcat)
 					# Important to update the dictionary with the new geometry
-					geometryDictionary[grd2] = geometries					
+					geometryDictionary[grd2] = geometries
 				del dcat
 				del polyrows3
 				
