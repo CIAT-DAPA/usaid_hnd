@@ -26,14 +26,18 @@ threshold = raw_input("Enter the threshold area (m2): ")
 # Output name
 out_name = raw_input("Enter name of the output layer: ")
 
+print "\n######################################################"
+print "Initialization Processes\n"
+
 # Create a copy of the input layer
-print "Copying layer"
+print "1. Copying layer"
 in_layer =  os.path.join(ws, layer)
 out_layer = os.path.join(ws, out_name)
 inpgs = arcpy.CopyFeatures_management(in_layer, out_layer)
 
 # Read polygon geometry into dictionary; key = HydroID, value = geometry
-print "Creating initial dictionary. This process can take long time if the input layer contains many polygons!"
+print "2. Creating initial dictionary. This process can take long time if the input layer contains many polygons!"
+print "######################################################"
 geometryDictionary = {}
 polyrows = arcpy.SearchCursor(inpgs)
 for prow in polyrows:
@@ -50,6 +54,7 @@ where1 = '"' + 'Shape_Area' + '" < ' + threshold
 should_restart = True
 while should_restart:
 	should_restart = False
+
 	# Important to order in ascending way to start always from upstream catchments
 	with arcpy.da.SearchCursor(inpgs, fields, sql_clause = (None, 'WHERE ' + where1 + ' ORDER BY ' + fields[0])) as cursor:
 		for prow1 in cursor:
@@ -60,6 +65,11 @@ while should_restart:
 		
 			# If the NextDownID field is different from -1 (coastal catchment)
 			if grd2 != -1:
+
+				# Make a feature layer just to know if the query returns a record
+				arcpy.MakeFeatureLayer_management(inpgs, 'just_a_draft1', where1)
+				print "\n" + str(int(arcpy.GetCount_management('just_a_draft1').getOutput(0))) + " catchment(s) have area(s) less than the threshold value"
+				arcpy.Delete_management('just_a_draft1')
 				
 				print "######################################################"
 				print "Analyzing the catchment with HydroID: " + str(grd1)
@@ -76,9 +86,9 @@ while should_restart:
 				where2 = '"' + fields[1] + '" = ' + str(grd1)
 				
 				# Make a feature layer just to know if the query returns a record
-				arcpy.MakeFeatureLayer_management(inpgs, 'just_a_test', where2)
+				arcpy.MakeFeatureLayer_management(inpgs, 'just_a_draft2', where2)
 
-				if int(arcpy.GetCount_management('just_a_test').getOutput(0)) > 0:
+				if int(arcpy.GetCount_management('just_a_draft2').getOutput(0)) > 0:
 					# Change the NextDownID of the upstream catchments of the current one in order to drain to the catchment with HydroID = grd2
 					polyrows1 = arcpy.UpdateCursor(inpgs, where2)
 					print "\tChanging the NextDownID values of the upstream catchments to be the HydroID (" + str(grd2) + ") of the downstream catchment"
@@ -88,7 +98,7 @@ while should_restart:
 						polyrows1.updateRow(ucat)
 					del ucat
 					del polyrows1
-				arcpy.Delete_management('just_a_test')
+				arcpy.Delete_management('just_a_draft2')
 				
 				# Query to get the current catchment 
 				where3 = '"' + fields[0] + '" = ' + str(grd1)
