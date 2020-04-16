@@ -1,4 +1,5 @@
-## Script to merge catchments (with areas less than 100 ha) to their downstream catchments without affecting the net connectivity. These catchments were created with ArcHydro Tools.
+## Script to merge catchments (with areas less than a threshold defined in square meters) to their downstream catchments without affecting the net connectivity.
+## These catchments were created with ArcHydro Tools. Remember to having  run the tool "Adjoint Catchment Processing" before executing this script
 ## Author:  Jefferson Valencia Gomez
 ## E-mail: jefferson.valencia.gomez@gmail.com
 
@@ -19,17 +20,24 @@ ws = raw_input("Enter workspace (*.gdb): ")
 # Catchment polygons feature class stored on a database, no shapefile allowed
 layer = raw_input("Enter layer name (no shapefile allowed): ")
 
+# Threshold that defines the minimum area allowed for the catchments
+threshold = raw_input("Enter the threshold area (m2): ")
+
 # Output name
 out_name = raw_input("Enter name of the output layer: ")
 
+print "\n######################################################"
+print "Initialization Processes\n"
+
 # Create a copy of the input layer
-print "Copying layer"
+print "1. Copying layer"
 in_layer =  os.path.join(ws, layer)
 out_layer = os.path.join(ws, out_name)
 inpgs = arcpy.CopyFeatures_management(in_layer, out_layer)
 
 # Read polygon geometry into dictionary; key = HydroID, value = geometry
-print "Creating initial dictionary. This process can take long time if the input layer contains many polygons!"
+print "2. Creating initial dictionary. This process can take long time if the input layer contains many polygons!"
+print "######################################################"
 geometryDictionary = {}
 polyrows = arcpy.SearchCursor(inpgs)
 for prow in polyrows:
@@ -40,12 +48,13 @@ del polyrows
 # Fields to be used into the main functions
 fields = ['HydroID', 'NextDownID', 'SHAPE@']
 # Change the value below depending on the minimum catchment area to preserve. Default is 100 ha = 1000000 m2
-where1 = '"' + 'Shape_Area' + '" < 1000000'
+where1 = '"' + 'Shape_Area' + '" < ' + threshold
 
 # Loop through catchments that will be dissolved
 should_restart = True
 while should_restart:
 	should_restart = False
+
 	# Important to order in ascending way to start always from upstream catchments
 	with arcpy.da.SearchCursor(inpgs, fields, sql_clause = (None, 'WHERE ' + where1 + ' ORDER BY ' + fields[0])) as cursor:
 		for prow1 in cursor:
@@ -56,6 +65,11 @@ while should_restart:
 		
 			# If the NextDownID field is different from -1 (coastal catchment)
 			if grd2 != -1:
+
+				# Make a feature layer just to know if the query returns a record
+				arcpy.MakeFeatureLayer_management(inpgs, 'just_a_draft1', where1)
+				print "\n" + str(int(arcpy.GetCount_management('just_a_draft1').getOutput(0))) + " catchment(s) have area(s) less than the threshold value"
+				arcpy.Delete_management('just_a_draft1')
 				
 				print "######################################################"
 				print "Analyzing the catchment with HydroID: " + str(grd1)
@@ -71,15 +85,20 @@ while should_restart:
 				# Query to get upstream catchments of the current one
 				where2 = '"' + fields[1] + '" = ' + str(grd1)
 				
-				# Change the NextDownID of the upstream catchments of the current one in order to drain to the catchment with HydroID = grd2
-				polyrows1 = arcpy.UpdateCursor(inpgs, where2)	
-				print "\tChanging the NextDownID values of the upstream catchments to be the HydroID (" + str(grd2) + ") of the downstream catchment"				
-				for ucat in polyrows1:
-					print "\t\tChanging the NextDownID (" + str(ucat.getValue(fields[1])) + ") value of the upstream catchment (HydroID: " + str(ucat.getValue(fields[0])) + ") by " + str(grd2)
-					ucat.setValue(fields[1], grd2)
-					polyrows1.updateRow(ucat)
-				del ucat
-				del polyrows1
+				# Make a feature layer just to know if the query returns a record
+				arcpy.MakeFeatureLayer_management(inpgs, 'just_a_draft2', where2)
+
+				if int(arcpy.GetCount_management('just_a_draft2').getOutput(0)) > 0:
+					# Change the NextDownID of the upstream catchments of the current one in order to drain to the catchment with HydroID = grd2
+					polyrows1 = arcpy.UpdateCursor(inpgs, where2)
+					print "\tChanging the NextDownID values of the upstream catchments to be the HydroID (" + str(grd2) + ") of the downstream catchment"
+					for ucat in polyrows1:
+						print "\t\tChanging the NextDownID (" + str(ucat.getValue(fields[1])) + ") value of the upstream catchment (HydroID: " + str(ucat.getValue(fields[0])) + ") by " + str(grd2)
+						ucat.setValue(fields[1], grd2)
+						polyrows1.updateRow(ucat)
+					del ucat
+					del polyrows1
+				arcpy.Delete_management('just_a_draft2')
 				
 				# Query to get the current catchment 
 				where3 = '"' + fields[0] + '" = ' + str(grd1)
@@ -100,11 +119,11 @@ while should_restart:
 				# Change the geometry of the polygon of the downstream catchment
 				polyrows3 = arcpy.UpdateCursor(inpgs, where4)
 				for dcat in polyrows3:
-					print "\tReplacing the geometry of the downstream catchment (HydroID: " + str(grd2) + ") with the merged geometries\n"			
+					print "\tReplacing the geometry of the downstream catchment (HydroID: " + str(grd2) + ") with the merged geometries\n"
 					dcat.Shape = geometries
-					polyrows3.updateRow(dcat)					
+					polyrows3.updateRow(dcat)
 					# Important to update the dictionary with the new geometry
-					geometryDictionary[grd2] = geometries					
+					geometryDictionary[grd2] = geometries
 				del dcat
 				del polyrows3
 				

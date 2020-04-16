@@ -3,29 +3,36 @@
 # March 2017
 
 
-inDir = "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/monthly_processed/"
-outDir = "Z:/Water_Planning_System/01_weather_stations/hnd_sanaa/"
+inDir = "C:/Users/lllanos/Desktop/all plot/"
+outDir = "C:/Users/lllanos/Desktop/all plot/"
 variable = "prec"
 variable = "tmax"
 variable = "tmin"
 
 dir.create(paste0(outDir,"quality_control"),showWarnings = F)
 dir.create(paste0(outDir,"quality_control/",variable),showWarnings = F)
-data_station=read.csv(paste0(inDir,variable,"_monthly_raw.csv"),header = T)
+data_station=read.csv(paste0(inDir,variable,"_merge_fill.csv"),header = T)
 nomb=names(data_station[,-1:-2])
+nomb_prec = substring(nomb,2,nchar(nomb))
+nomb_s_prec = do.call("rbind",strsplit(nomb_prec,"_"))
+name_st = paste0(nomb_s_prec[,2]," (",nomb_s_prec[,1],")")
 
 apply(data_station,2,summary)
-dates=seq(as.Date("1981/1/1"), as.Date("2017/12/31"), "month") #Definir periodo que se desea analizar
+dates=seq(as.Date("1981/1/1"), as.Date("2010/12/31"), "month") #Definir periodo que se desea analizar
 
-graf_line = function(x,y,title){
+ylabs = "Temperatura máxima"
+ylabs = "Precipitiación (mm)"
+graf_line = function(x,y,title, ylabs){
+  
+    
   png(paste0(outDir,"quality_control/",variable,"/",title,".png"), width = 10, height = 4,units = 'in',res=200)
-  plot(x,y,type="l",xlab="",ylab="Temperatura mínima",main=title)
+  plot(x,y,type="l",xlab="",ylab= ylabs,main=title)
   grid()
   dev.off()
   
 }
 
-lapply(1:(ncol(data_station)-2),function(j) graf_line(dates,data_station[,j+2],nomb[j]))
+lapply(1:(ncol(data_station)-2),function(j) graf_line(dates,data_station[,j+2],name_st[j],ylabs))
 
 
 
