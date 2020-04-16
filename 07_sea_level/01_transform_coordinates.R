@@ -9,10 +9,9 @@ var <- "zos"
 basegrid <- paste0(iDir, "/targetgrid.nc")
 
 if (!file.exists(basegrid) ){
-  writeRaster(raster(xmn=-180, xmx=180, ymn=-90, ymx=90, res=1), paste0(iDir, "targetgrid.nc") )
+  writeRaster(raster(xmn=-180, xmx=180, ymn=-90, ymx=90, resolution=1), paste0(iDir, "/targetgrid.nc"), overwrite=T )
   # system(paste0('cdo griddes ',  paste0(iDir, "targetgrid.nc"), " > ", paste0(iDir, "targetgrid.txt") ) )
 }
-
 
 gcmList <- c(
   "gfdl_cm3", "gfdl_esm2g", "gfdl_esm2m", "ipsl_cm5a_lr",
@@ -29,14 +28,16 @@ gcmList <- c(
 # "csiro_mk3_6_0", "giss_e2_r"
 
 gcmList_mod <- c(
-  "GFDL-CM3",
-  "GFDL-ESM2G",
-  "GFDL-ESM2M",
-  "HadGEM2-ES",
-  "IPSL-CM5A-LR",
-  "MIROC5",
-  "MRI-CGCM3",
-  "NorESM1-M"
+  # "GFDL-CM3",
+  # "GFDL-ESM2G",
+  # "GFDL-ESM2M",
+  # "HadGEM2-ES",
+  # "IPSL-CM5A-LR",
+  # "MIROC5",
+  # "MRI-CGCM3",
+  # "NorESM1-M",
+  "CSIRO-Mk3-6-0", 
+  "GISS-E2-R"
 )
 
 
@@ -61,7 +62,42 @@ for(rcp in rcpList){
       
     } 
     
+    
+    jpeg(paste0(iDir_raw, "/plot_example.jpg"), width = 1200, height = 800, pointsize = 8, res = 150)
+    plot(raster(nc) )
+    dev.off()
+    cat(rcp, gcm, " plot done\n")
+    
   }
   
+  # for(gcm in c() ){
+  #   
+  #   cat(rcp, gcm, "\n")
+  #   
+  #   iDir_gcm <- paste0(iDir, "/", rcp , "/", gcm, "/", ens)
+  #   iDir_raw <- paste0(iDir, "/", rcp , "/", gcm, "/", ens, "/original-data")
+  #   
+  #   nc <- list.files(path=iDir_gcm, pattern=paste0(var, "*"), full.names=TRUE)[1]
+  #   
+  #   if (!file.exists( iDir_raw )) {dir.create(iDir_raw, recursive=T)}  
+  #   
+  #   if (!file.exists( paste0(iDir_raw, "/", basename(nc) )) ) {
+  #     
+  #     targetgrid <- strsplit(paste0(iDir, "/targetgrid.nc"), "\\.")[[1]][1]
+  #     file.copy(nc, paste0(iDir_raw, "/", basename(nc) ))
+  #     
+  #     system(paste0('cdo setgrid,', targetgrid, ' ',  paste0(iDir_raw, "/", basename(nc) ),' ',nc))
+  #     # writeRaster( rotate(stack(paste0(iDir_raw, "/", basename(nc)) )), nc, overwrite=T)
+  #     cat(rcp, gcm, " projected\n")
+  #     
+  #   } 
+  #   
+  #   jpeg(paste0(iDir_raw, "/plot_example.jpg"), width = 1200, height = 800, pointsize = 8, res = 150)
+  #   plot(raster(nc) )
+  #   dev.off()
+  #   cat(rcp, gcm, " plot done\n")
+  #   
+  # }
+
 }
 

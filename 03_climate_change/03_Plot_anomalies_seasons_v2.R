@@ -17,7 +17,7 @@ rcpList <- c("rcp26", "rcp45", "rcp60", "rcp85")
 baseDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/03_Escenarios/anomalies_ens_v2"
 perList <- c("2020_2049", "2040_2069", "2070_2099")
 perListMod <- c("2030s", "2050s", "2080s")
-varList <- c("wsmean", "rsds") # c("tmin", "tmax", "tmean", "prec", "dtr") 
+varList <- c("dtr") # c("tmin", "tmax", "tmean", "prec", "dtr", "wsmean", "rsds") 
 # varList <- c("tmean", "dtr")
 seasons <- c("djf", "mam", "jja", "son", "ann")
 id <- rep(c("DEF ", "MAM", "JJA", "SON", "ANUAL"), length(perList))

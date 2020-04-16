@@ -17,18 +17,21 @@ for (dbf in dbflist){
   dbf_i$COUNT <- NULL
   dbf_i$AREA <- NULL
   
+
+  var <- paste(  strsplit(strsplit(basename(dbf), "\\.")[[1]][1] , "_")[[1]][4]  )
   
   if (var == "tmin" || var == "tmax" || var == "tmean"){
-    
     dbf_i$MEAN <- dbf_i$MEAN / 10 
-    
+  }
+  
+  rcp <- paste(  strsplit(strsplit(basename(dbf), "\\.")[[1]][1] , "_")[[1]][1]  )
+  
+  if (rcp != "historical" && var == "wsmean"){
+    dbf_i$MEAN <- dbf_i$MEAN / 10 
   }
   
   dbf_i$MEAN <- round(dbf_i$MEAN, digits = 1)
-  
   names(dbf_i)[2] <- paste(strsplit(basename(dbf), "\\.")[[1]][1])
-
-  var <- paste(  strsplit(strsplit(basename(dbf), "\\.")[[1]][1] , "_")[[1]][4]  )
   
   microwht_rg <- merge(microwht_rg, dbf_i, by = "ID_MicroCu", all = TRUE)
 
@@ -36,7 +39,7 @@ for (dbf in dbflist){
     
 }
   
-write.csv(microwht_rg, paste0(oDir, "/microcuencas_rg_averages.csv"), row.names=F)
+write.csv(microwht_rg, paste0(oDir, "/microcuencas_rg_averages_v3.csv"), row.names=F)
 
 
 

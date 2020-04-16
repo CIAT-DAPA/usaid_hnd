@@ -14,13 +14,13 @@ require(maptools)
 require(rgdal)
 library(grid)
 
-baseDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/03_Interpolacion/average"
-downDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/04_Escenarios/downscaled_v2_ens"
-oDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/04_Escenarios/evaluation/by_regions_v2"
+baseDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/02_Interpolacion/average"
+downDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/03_Escenarios/downscaled_v2_ens"
+oDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/03_Escenarios/evaluation/by_regions_v3"
 
 rcp <- "rcp45"
 perList <- c("2020_2049", "2040_2069", "2070_2099")
-regions <- readOGR("D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/03_Interpolacion/region/Regiones_Desarrollo_prj_v2.shp")
+regions <- readOGR("D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/02_Interpolacion/region/Regiones_Desarrollo_prj_v2.shp")
 varLs <- c("prec", "tmean")
 
 
@@ -126,23 +126,23 @@ for (i in 1:length(as.vector(regions$REGION)) ){
   par(mar=c(7,4,1,4)+ 0.1)
   
   if (i == 13 || i == 15){
-    barx2 <- barplot(yy, beside=T, axes=F, col=c("lightblue","steelblue1", "steelblue3", "steelblue4"), ylim=c(0,max(yy)+100), axis.lty=1, xlab="", ylab="", 
+    barx2 <- barplot(yy, beside=T, axes=F, col=c("lightblue","steelblue1", "steelblue3", "steelblue4"), ylim=c(0,520), axis.lty=1, xlab="", ylab="", 
                      cex.axis=1.1, names.arg=mth_lb, tcl=-0.3, cex.names=1.1)
     error.bar(barx2,yy,sdtotal)
-    axis(2, ylim=c(0,max(yy)+100), col="black", lwd=1, cex.axis=1.1)
+    axis(2, ylim=c(0,520), col="black", lwd=1, cex.axis=1.1)
   } else {
-    barx2 <- barplot(yy, beside=T, axes=F, col=c("lightblue","steelblue1", "steelblue3", "steelblue4"), ylim=c(0,max(yy)+50), axis.lty=1, xlab="", ylab="", 
+    barx2 <- barplot(yy, beside=T, axes=F, col=c("lightblue","steelblue1", "steelblue3", "steelblue4"), ylim=c(0,520), axis.lty=1, xlab="", ylab="", 
                      cex.axis=1.1, names.arg=mth_lb, tcl=-0.3, cex.names=1.1)
     error.bar(barx2,yy,sdtotal)
-    axis(2, ylim=c(0,max(yy)+50), col="black", lwd=1, cex.axis=1.1)
+    axis(2, ylim=c(0,520), col="black", lwd=1, cex.axis=1.1)
   }
 
   
   ##Plot current and future temperature  
   par(new=TRUE)  
-  plot(t.means,axes=FALSE,ann=FALSE,type="n",ylim=c(0,round(max(tm.means2080) + 0.5)),ylab="", xlab="", cex.lab=1.1, cex.axis=1.1)
+  plot(t.means,axes=FALSE,ann=FALSE,type="n",ylim=c(0,30 + 0.5),ylab="", xlab="", cex.lab=1.1, cex.axis=1.1)
   
-  axis(4, tcl=-0.3, cex.axis=1.1, ylim=c(0,round(max(tm.means2080) + 0.5)))
+  axis(4, tcl=-0.3, cex.axis=1.1, ylim=c(0,30 + 0.5))
   
   mtext(2, text="Precipitación (mm/mes)", line=2.5, cex = 1.1) 
   mtext(4,text="Temperatura (°C)", line=2.5, cex = 1.1)

@@ -20,15 +20,18 @@ downDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/03_Escena
 oDir <- "D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/03_Escenarios/evaluation/by_regions_v3"
 
 rcp <- "rcp45"
+rcpLs <- c("rcp45", "rcp85")
 period <- "2040_2069"
 varList <- c("prec", "tmean")
 regions <- readOGR("D:/OneDrive - CGIAR/CIAT/Projects/hnd-pnud-ciat-escenarios/02_Interpolacion/region/Regiones_Desarrollo_prj_v2.shp")
-id <- c("Línea Base (Histórico)", "Proyecciones 2050s (Futuro)")
+# id <- c("Línea Base (Histórico)", "Proyecciones 2050s (Futuro)")
+id <- c("Línea Base (Histórico)")
+id_a <- c("Cambio a 2050s RCP4.5 (Futuro)", "Cambio a 2050s RCP8.5 (Futuro)")
 
 hgh <- c(1300, 1300, 1600, 600, 800, 700, 700, 800, 2500, 1100, 900, 1000, 1400, 900, 800, 1300)
 
-for (i in 1:length(as.vector(regions$REGION)) ){
-  
+# for (i in 1:length(as.vector(regions$REGION)) ){
+  i=9
   ## Current and future
   
   rg <- regions[regions$REGION == as.vector(regions$REGION)[i], ]
@@ -36,14 +39,15 @@ for (i in 1:length(as.vector(regions$REGION)) ){
   for (var in varList){
   
     baseRs <- raster(paste0(baseDir, "/", var, "_ann.tif"))
-    downRs <- raster(paste0(downDir, "/", rcp, "/", period, "/", var, "_ann.tif"))
+    # downRs <- raster(paste0(downDir, "/", rcp, "/", period, "/", var, "_ann.tif"))
 
     if(var != "prec"){
       baseRs <- baseRs / 10
-      downRs <- downRs / 10
+      # downRs <- downRs / 10
     }
 
-    stk <- stack(c(baseRs, downRs))
+    # stk <- stack(c(baseRs, downRs))
+    stk <- baseRs
     stk_crop <- crop(mask(stk, rg), extent(rg))
 
     if (var == "prec"){
@@ -109,102 +113,182 @@ for (i in 1:length(as.vector(regions$REGION)) ){
     myTheme$axis.line$col = 'white'
 
     # tiff(paste(oDir, "/plot_", as.vector(regions$REGION)[i], "_", var, ".tif", sep=""), width=ncol(stk_crop)*18, height=(nrow(stk_crop)*9+200), pointsize=8, compression='lzw',res=200)
-    tiff(paste(oDir, "/plot_", as.vector(regions$REGION)[i], "_", var, ".tif", sep=""), width=2400, height=hgh[i], pointsize=8, compression='lzw',res=200)
+    tiff(paste(oDir, "/plot_", as.vector(regions$REGION)[i], "_", var, ".tif", sep=""), width=1250, height=hgh[i], pointsize=8, compression='lzw',res=200)
 
     print(levelplot(plot, at = zvalues,
                     scales = list(draw=FALSE),
                     names.attr=rep("", length(id)),
-                    layout=c(2, 1),
+                    layout=c(1, 1),
+                    margin=F,
                     xlab="",
                     # par.strip.text=list(cex=0),
                     par.settings = myTheme,
-                    colorkey = list(space = "bottom", width=1.2, height=1, labels=list(cex=1.4) )
+                    colorkey = list(space = "right", width=1.2, height=1, labels=list(cex=1.3) )
     )
     + layer(sp.polygons(rg, lwd=0.8))
 
     )
 
     if (var == "prec"){
-      grid.text(expression("mm"), 0.2, 0, hjust=5, vjust=-7, gp=gpar(fontsize=16))
+      grid.text(expression("mm"), 0.2, 0, hjust=2.5, vjust=-7, gp=gpar(fontsize=16))
     } else {
-      grid.text(expression("°C"), 0.2, 0, hjust=8, vjust=-5, gp=gpar(fontsize=16))
+      grid.text(expression("°C"), 0.2, 0, hjust=4, vjust=-5, gp=gpar(fontsize=16))
     }
 
     dev.off()
 
 
     # Changes
+
+    anom <- raster(paste0(anomDir, "/", rcp, "/", period, "/", var, "_ann.tif"))
+    anom <- stack(paste0(anomDir, "/", rcpLs, "/", period, "/", var, "_ann.tif"))
+    anom_crop <- crop(mask(anom, rg), extent(rg))
+
+
+    if (var == "prec"){
+
+      anom_crop[anom_crop > 10] = 10
+      anom_crop[anom_crop < (-10)] = (-10)
+
+      # plot <- setZ(anom_crop, "chg")
+      # names(plot) <- "chg"
+
+      zvalues <- seq(-10, 10, 1) # Define limits
+      myTheme <- BuRdTheme() # Define squeme of colors
+      myTheme$regions$col=colorRampPalette(c("darkred", "red", "pink", "snow", "deepskyblue", "blue", "darkblue"))(length(zvalues)-1) # Set new colors
+
+    } else if (var == "dtr") {
+
+      stk_crop <- stk_crop
+      stk_crop[stk_crop > 3 ] = 3
+      stk_crop[stk_crop < 1 ] = 1
+
+      # plot <- setZ(anom_crop, "chg")
+      # names(plot) <- "chg"
+
+      zvalues <- seq(1, 3, 0.1)
+      myTheme <- BuRdTheme()
+      myTheme$regions$col=colorRampPalette(c("yellow","orange", "red", "darkred"))(length(zvalues)-1)
+
+    } else {
+
+      zmin <- 0.5
+      zmax <- 4
+
+      anom_crop[anom_crop > zmax] = zmax
+
+      zvalues <- seq(zmin, zmax, 0.1)
+      myTheme <- BuRdTheme()
+      myTheme$regions$col=colorRampPalette(c("yellow","orange", "red", "darkred"))(length(zvalues)-1)
+
+    }
+
+    plot <- setZ(anom_crop, id_a)
+    names(plot) <- id_a
+
+    myTheme$strip.border$col = "white"
+    myTheme$axis.line$col = 'white'
+
+    tiff(paste(oDir, "/plot_", as.vector(regions$REGION)[i], "_", var, "_chg.tif", sep=""), width=2400, height=hgh[i], pointsize=8, compression='lzw',res=200)
+
+    print(levelplot(plot, at = zvalues,
+                    scales = list(draw=FALSE),
+                    xlab="", ylab="",
+                    layout=c(2, 1),
+                    names.attr=rep("", length(id_a)),
+                    # par.strip.text=list(cex=0),
+                    par.settings = myTheme,
+                    margin=FALSE,
+                    colorkey = list(space = "right", width=1.3, height=1, labels=list(cex=1.3))
+    )
+    + layer(sp.polygons(rg, lwd=0.8))
+    )
+
+    if (var == "prec"){
+      grid.text(expression("%"), 0.2, 0, hjust=9, vjust=-5, gp=gpar(fontsize=16))
+    } else {
+      grid.text(expression("°C"), 0.2, 0, hjust=7, vjust=-5, gp=gpar(fontsize=16))
+    }
+
+    dev.off()
     
-    # anom <- raster(paste0(anomDir, "/", rcp, "/", period, "/", var, "_ann.tif")) 
+    
+    # # Changes vertical
+    # 
+    # # anom <- raster(paste0(anomDir, "/", rcp, "/", period, "/", var, "_ann.tif"))
+    # anom <- stack(paste0(anomDir, "/", rcpLs, "/", period, "/", var, "_ann.tif"))
     # anom_crop <- crop(mask(anom, rg), extent(rg))
     # 
     # 
     # if (var == "prec"){
-    #   
+    # 
     #   anom_crop[anom_crop > 10] = 10
     #   anom_crop[anom_crop < (-10)] = (-10)
-    #   
-    #   plot <- setZ(anom_crop, "chg")
-    #   names(plot) <- "chg"
-    #   
+    # 
+    #   # plot <- setZ(anom_crop, "chg")
+    #   # names(plot) <- "chg"
+    # 
     #   zvalues <- seq(-10, 10, 1) # Define limits
     #   myTheme <- BuRdTheme() # Define squeme of colors
     #   myTheme$regions$col=colorRampPalette(c("darkred", "red", "pink", "snow", "deepskyblue", "blue", "darkblue"))(length(zvalues)-1) # Set new colors
     # 
     # } else if (var == "dtr") {
-    #   
-    #   stk_crop <- stk_crop 
+    # 
+    #   stk_crop <- stk_crop
     #   stk_crop[stk_crop > 3 ] = 3
     #   stk_crop[stk_crop < 1 ] = 1
-    #   
-    #   plot <- setZ(anom_crop, "chg")
-    #   names(plot) <- "chg"
-    #   
+    # 
+    #   # plot <- setZ(anom_crop, "chg")
+    #   # names(plot) <- "chg"
+    # 
     #   zvalues <- seq(1, 3, 0.1)
     #   myTheme <- BuRdTheme()
     #   myTheme$regions$col=colorRampPalette(c("yellow","orange", "red", "darkred"))(length(zvalues)-1)
     # 
     # } else {
-    #   
+    # 
     #   zmin <- 0.5
-    #   zmax <- 3
-    #   
+    #   zmax <- 4
+    # 
     #   anom_crop[anom_crop > zmax] = zmax
-    #   
-    #   plot <- setZ(anom_crop, "chg")
-    #   names(plot) <- "chg"
-    #   
+    # 
     #   zvalues <- seq(zmin, zmax, 0.1)
     #   myTheme <- BuRdTheme()
     #   myTheme$regions$col=colorRampPalette(c("yellow","orange", "red", "darkred"))(length(zvalues)-1)
     # 
-    # } 
+    # }
+    # 
+    # plot <- setZ(anom_crop, id_a)
+    # names(plot) <- id_a
     # 
     # myTheme$strip.border$col = "white"
     # myTheme$axis.line$col = 'white'
     # 
-    # tiff(paste(oDir, "/plot_", as.vector(regions$REGION)[i], "_", var, "_chg.tif", sep=""), width=1300, height=hgh[i], pointsize=8, compression='lzw',res=200)
+    # tiff(paste(oDir, "/plot_", as.vector(regions$REGION)[i], "_", var, "_chg.tif", sep=""), width=1250, height=hgh[i]*2-100, pointsize=8, compression='lzw',res=200)
     # 
-    # print(levelplot(plot, at = zvalues,  
-    #                 scales = list(draw=FALSE), 
+    # print(levelplot(plot, at = zvalues,
+    #                 scales = list(draw=FALSE),
     #                 xlab="", ylab="",
+    #                 layout=c(1, 2),
+    #                 names.attr=rep("", length(id_a)),
     #                 # par.strip.text=list(cex=0),
     #                 par.settings = myTheme,
-    #                 margin=FALSE, 
-    #                 colorkey = list(space = "bottom", width=1.2, height=1, labels=list(cex=1.4))
+    #                 margin=FALSE,
+    #                 colorkey = list(space = "bottom", width=1.3, height=1, labels=list(cex=1.3))
     # )
     # + layer(sp.polygons(rg, lwd=0.8))
     # )
     # 
     # if (var == "prec"){
-    #   grid.text(expression("%"), 0.2, 0, hjust=4.5, vjust=-5, gp=gpar(fontsize=16))  
+    #   grid.text(expression("%"), 0.2, 0, hjust=5, vjust=-6.5, gp=gpar(fontsize=16))
     # } else {
-    #   grid.text(expression("°C"), 0.2, 0, hjust=3.5, vjust=-5, gp=gpar(fontsize=16))  
+    #   grid.text(expression("°C"), 0.2, 0, hjust=4, vjust=-6.5, gp=gpar(fontsize=16))
     # }
     # 
     # dev.off()
     
+    
   }
   
-}
+# }
 
